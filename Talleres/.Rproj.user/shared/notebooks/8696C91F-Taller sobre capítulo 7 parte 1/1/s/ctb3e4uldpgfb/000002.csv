@@ -1,0 +1,6 @@
+"0","n <- 500"
+"0","x <- sample(x = 1:5, size = n, replace = T)"
+"0","eta <- -1.4 + 0.33 * x"
+"0","pi <- exp(eta) / (1 + exp(eta))"
+"0","y <- rbinom(n=n, size=1, prob=pi)"
+"0","datos <- data.frame(y=y, x=x)"

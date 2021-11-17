@@ -1,0 +1,164 @@
+---
+title: "Taller sobre capítulo 5 parte 1"
+author: "Jennifer Salazar"
+date: "16/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Instrucciones generales
+
+Para realizar este taller usted debe:
+
+* Descargar el archivo nes5200_processed_voters_realideo.dta que se encuentra en la carpeta nes dentro de la carpeta ARM_Data.
+* Instalar el paquete haven de R para poder leer bases de datos en formatos de ‘SPSS’, ‘Stata’ y ‘SAS’.
+* Utilizar el código de abajo para leer la base de datos.
+
+
+```{r}
+library(haven)
+datos <- read_dta("Datos/ARM_Data/nes/nes5200_processed_voters_realideo.dta")
+attach(datos)
+
+# Tomar un subconjunto de los datos
+yr <- 1992
+ok <- year == yr & presvote < 3
+vote <- presvote[ok] - 1
+income <- income[ok]
+```
+
+
+
+Preguntas:
+
+1. ¿Qué representa el valor de 0 y 1 en la variable vote?
+
+yi = 1 si prefirió a George Bush (el candidato republicano a la presidencia) 
+yi = 0 si prefería a Bill Clinton (el candidato demócrata)
+
+
+2. Construya un diagrama de barras para mostrar la preferencia de los encuentados por los candidatos Bush y Clinton. Edite la figura para que aparezcan los nombres de los candidatos en lugar del número uno y cero. ¿Quién tiene mayor porcentaje de intención de voto?
+
+
+```{r}
+barplot(table(vote), col="cyan4", xaxt="n", ylim=c(0, 850))
+axis(1, c(0.7,1.9), c("Clinton", "Bush"))
+text(0.7, table(vote)[1]+40, paste(round(prop.table(table(vote))[1]*100,2), "%"))
+text(1.9, table(vote)[2]+40, paste(round(prop.table(table(vote))[2]*100,2), "%"))
+```
+
+
+Clinton tiene mayor porcentaje de intención de voto (58.67%)
+
+3. Construya un diagrama de barras con frecuencia relativa para la variable ingreso. ¿Cuál es el nivel de ingresos que menos presencia tiene entre los encuestados?
+
+```{r}
+barplot(prop.table(table(income)), col="cyan4")
+grid()
+```
+
+El nivel de ingreso que menos tiene presencia entre los encuestados es el nivel 5.
+
+
+4. Ajuste el modelo fit.1 de la sección 5.1 y obtenga el resumen del modelo usando la función display. ¿Por qué no coinciden sus resultados con los del libro?
+
+
+```{r}
+fit.1 <- glm(vote ~ income, family=binomial(link="logit"))
+summary(fit.1)
+```
+
+
+No coincide con el resultado del libro dado que es una estimación de los parametros, entonces será aproximado.
+
+
+
+5. Replique la figura 5.1.a del libro.
+
+
+```{r}
+# Graph figure 5.1 (a)
+
+# Logit inversa
+invlogit <- function(x){
+  salida <- exp(x)/(1+exp(x))
+  return(salida)
+}
+
+par(mfrow=c(1,2))
+#Gráfica 1
+curve (invlogit(coef(fit.1)[1] + coef(fit.1)[2]*x), 1, 5, ylim=c(-.01,1.01),
+       xlim=c(-2,8), xaxt="n", xaxs="i", mgp=c(2,.5,0),
+       ylab="Pr (Republican vote)", xlab="Income", lwd=4)
+curve (invlogit(coef(fit.1)[1] + coef(fit.1)[2]*x), -2, 8, lwd=.5, add=T)
+axis (1, 1:5, mgp=c(2,.5,0))
+mtext ("(poor)", 1, 1.5, at=1, adj=.5)
+mtext ("(rich)", 1, 1.5, at=5, adj=.5)
+points (jitter (income, .5), jitter (vote, .08), pch=20, cex=.1)
+
+
+require(arm)
+# Graph figure 5.1 (b)
+sim.1 <- sim(fit.1)
+curve (invlogit(fit.1$coef[1] + fit.1$coef[2]*x), .5, 5.5, ylim=c(-.01,1.01),
+         xlim=c(.5,5.5), xaxt="n", xaxs="i", mgp=c(2,.5,0),
+         ylab="Pr (Republican vote)", xlab="Income", lwd=1)
+  for (j in 1:20){
+    curve (invlogit(sim.1@coef[j,1] + sim.1@coef[j,2]*x), col="gray", lwd=.5, add=T)
+  }
+  curve (invlogit(fit.1$coef[1] + fit.1$coef[2]*x), add=T)
+  axis (1, 1:5, mgp=c(2,.5,0))
+  mtext ("(poor)", 1, 1.5, at=1, adj=.5)
+  mtext ("(rich)", 1, 1.5, at=5, adj=.5)
+  points (jitter (income, .5), jitter (vote, .08), pch=20, cex=.1)
+
+```
+
+6. Prediga manualmente P(Y=1|X=x) para tres votantes con nivel de ingresos x=1, x=3 y x=5
+
+
+$$P(Y=1|X=x)=logit^{-1}(\hat{\beta}_0+\hat{\beta}_1 Income)$$
+
+$$P(Y=1|X=x)=logit^{-1}(-1.3017+0.3033 Income)$$
+
+
+Para x=1
+
+$$P(Y=1|X=1)=logit^{-1}(-1.3017+0.3033*(1))=\frac{e^{-1.3017+0.3033*(1)}}{1+e^{-1.3017+0.3033*(1)}}=0.2693 ~~->~~ 0$$
+
+Para x=3
+
+$$P(Y=1|X=3)=logit^{-1}(-1.3017+0.3033*(3))=\frac{e^{-1.3017+0.3033*(3)}}{1+e^{-1.3017+0.3033*(3)}}=0.4033 ~~->~~ 0$$
+
+Para x=5
+
+
+$$P(Y=1|X=5)=logit^{-1}(-1.3017+0.3033*(5))=\frac{e^{-1.3017+0.3033*(5)}}{1+e^{-1.3017+0.3033*(5)}}=0.5535 ~~->~~ 1$$
+
+Consulte la ayuda de la función predit.glm, lea con cuidado y comprenda todos los argumentos de la función. ¿Para qué se usa el argumento type?
+
+```{r}
+?predict.glm
+```
+
+
+predict(object, newdata = NULL,
+            type = c("link", "response", "terms"),
+            se.fit = FALSE, dispersion = NULL, terms = NULL,
+            na.action = na.pass, ...)
+            
+            
+el tipo de predicción requerida. El valor predeterminado está en la escala de los predictores lineales; la "respose" alternativa está en la escala de la variable de respuesta. Por lo tanto, para un modelo binomial predeterminado, las predicciones predeterminadas son log-odds (probabilidades en una escala logit) y type = "response" da las probabilidades predichas. La opción "terms" devuelve una matriz con los valores ajustados de cada término en la fórmula del modelo en la escala del predictor lineal.            
+
+
+8. Use predit para predecir P(Y=1|X=x) para tres votantes con nivel de ingresos x=1, x=3 y x=5. ¿Qué argumento debe modificar para obtener los resultados obtenidos de forma manual?
+
+
+```{r}
+datos_nuevos <- data.frame(income=c(1,3,5))
+predict.glm(fit.1, newdata = datos_nuevos, type= "response")
+```
+

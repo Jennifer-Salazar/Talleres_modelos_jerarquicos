@@ -1,0 +1,4 @@
+"0","par(mfrow=c(2, 2))"
+"0","wp(mod.p.final)  ; title('Poisson')"
+"2","Some points are missed out 
+increase the y limits using ylim.all"

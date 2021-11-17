@@ -27,7 +27,7 @@ attach(wells)
 ```
 
 
-* Regresión logística con un solo predictor
+# Regresión logística con un solo predictor
 
 ```{r}
 fit.1 <- glm(switch ~ dist, family=binomial(link="logit"))
@@ -74,23 +74,148 @@ El resultado se muestra en la Figura 5.9. La probabilidad de cambio es de aproxi
 
 
 
+* Modelo ajustado 
+
+$$Pr(switch) = logit^{−1}(0.61 − 0.62 · dist100).$$
+
+Interpretaciones:
+
+* El término constante se puede interpretar cuando dist100 = 0, en cuyo caso la probabilidad de cambio es $logit^{−1} (0,61) = 0,65$. Por lo tanto, el modelo estima una probabilidad del 65% de cambiar si vive junto a un pozo seguro existente.
+
+* Podemos evaluar la diferencia predictiva con respecto a dist100 calculando la derivada en el valor promedio de dist100 en el conjunto de datos, que es 0,48 (es decir, 48 metros; consulte la Figura 5.8). El valor del predictor lineal aquí es $0.61−0.62 · 0.48 = 0.31$, por lo que la pendiente de la curva en este punto es $−0.62 * e^{0.31} / (1 + e^{0.31})^2 = −0.15$. Por lo tanto, agregar 1 a dist100, es decir, agregar 100 metros a la distancia al pozo seguro más cercano, corresponde a una diferencia negativa en la probabilidad de conmutación de alrededor del 15%.
+
+
+Más rápidamente, la “regla de la división por 4” nos da −0,62 / 4 = −0,15. Esto resulta igual, con dos decimales, como se calculó usando la derivada porque la curva pasa por el punto del 50% justo en el medio de los datos (ver Figura 5.9).
+
+
+Además de interpretar su magnitud, podemos observar la significancia estadística del coeficiente para la distancia. La pendiente se estima bien, con un error estándar de solo 0,10, que es muy pequeño en comparación con el coeficiente estimado de −0,62. El intervalo aproximado del 95% es [−0,82, −0,42], que es claramente estadísticamente significativamente diferente de cero.
+
+
+# Adicionando la segunda variable al modelo 
+
+Ahora ampliamos el ejemplo de cambio de pozo agregando el nivel de arsénico del pozo existente como una entrada de regresión. A los niveles presentes en el agua potable de Bangladesh, los riesgos para la salud del arsénico son aproximadamente proporcionales a la exposición, por lo que esperaríamos que el cambio sea más probable en pozos con altos niveles de arsénico.
+
+```{r}
+fit.3 <- glm (switch ~ dist100 + arsenic, family=binomial(link="logit"))
+summary(fit.3)
+```
+
+
+Por lo tanto, al comparar dos pozos con el mismo nivel de arsénico, cada 100 metros de distancia al pozo seguro más cercano corresponde a una diferencia negativa de 0.90 en la probabilidad logit de cambio. De manera similar, una diferencia de 1 en la concentración de arsénico corresponde a una diferencia positiva de 0.46 en la probabilidad logit de cambio. Ambos coeficientes son estadísticamente significativos, cada uno a más de 2 errores estándar de cero. Y ambos signos tienen sentido: cambiar es más fácil si hay un pozo seguro cercano, y si el pozo existente de un hogar tiene un alto nivel de arsénico, debería haber más motivación para cambiar.
+
+
+Para una interpretación rápida, dividimos los coeficientes entre 4: por lo tanto, 100 metros más en la distancia corresponden a una probabilidad de cambio aproximadamente 22% menor, y 1 unidad más en concentración de arsénico corresponde a una diferencia positiva de aproximadamente 11% en la probabilidad de cambio.
+
+
+* Gráfico:
+
+
+```{r}
+
+par(mfrow=c(1,2))
+plot(dist, switch.jitter, xlim=c(0,max(dist)))
+curve(invlogit (cbind (1, x/100, .5) %*% coef(fit.3)), add=TRUE)
+curve(invlogit (cbind (1, x/100, 1.0) %*% coef(fit.3)), add=TRUE)
+
+plot (arsenic, switch.jitter, xlim=c(0,max(arsenic)))
+curve (invlogit (cbind (1, 0, x) %*% coef(fit.3)), add=TRUE)
+curve (invlogit (cbind (1,.5, x) %*% coef(fit.3)), add=TRUE)
+```
 
 
 
+# Regresión logistica con interacción
 
 
+```{r}
+fit.4 <- glm (switch ~ dist100 + arsenic + dist100:arsenic,
+              family=binomial(link="logit"))
+
+summary(fit.4)
+```
 
 
+* Interpretaciones:
 
 
+Para entender los números de la tabla, usamos los siguientes trucos:
+
+• Evaluar predicciones e interacciones en la media de los datos, que tienen valores promedio de 0,48 para dist100 y 1,66 para arsénico (es decir, una distancia media de 48 metros hasta el pozo seguro más cercano y un nivel medio de arsénico de 1,66 entre los pozos).
+
+• Dividir entre 4 para obtener diferencias predictivas aproximadas en la escala de probabilidad. Ahora interpretamos cada coeficiente de regresión por turno.
 
 
+• Término constante: $logit^{−1}(−0.15) = 0.47$ es la probabilidad estimada de cambio, si la distancia al pozo seguro más cercano es 0 y el nivel de arsénico del pozo actual es 0. Esta es una condición imposible (ya que los niveles de arsénico todos exceden 0.5 en nuestro conjunto de pozos inseguros), por lo que no intentamos interpretar el término constante. En cambio, podemos evaluar la predicción en los valores promedio de dist100 = 0.48 y arsénico = 1.66, donde la probabilidad de cambio es $logit^{ −1} (−0.15 - 0.58 · 0.48 + 0.56 · 1.66 - 0.18 · 0.48 · 1.66) = 0.59.$
+
+• Coeficiente de distancia: corresponde a comparar dos pozos que difieren en 1 en dist100, si el nivel de arsénico es 0 para ambos pozos. Una vez más, no deberíamos intentar interpretar esto. En cambio, podemos mirar el valor promedio, arsénico = 1.66, donde la distancia tiene un coeficiente de −0.58 - 0.18 · 1.66 = −0.88 en la escala logit. Para interpretar esto rápidamente en la escala de probabilidad, dividimos por 4: −0,88 / 4 = −0,22. Por lo tanto, al nivel medio de arsénico en los datos, cada 100 metros de distancia corresponde a una diferencia negativa aproximada del 22% en la probabilidad de cambio.
+
+• Coeficiente para arsénico: corresponde a comparar dos pozos que difieren en 1 en arsénico, si la distancia al pozo seguro más cercano es 0 para ambos. En cambio, evaluamos la comparación en el valor promedio de la distancia, dist100 = 0.48, donde el arsénico tiene un coeficiente de 0.56−0.18 · 0.48 = 0.47 en la escala logit. Para interpretar esto rápidamente en la escala de probabilidad, dividimos por 4: 0.47 / 4 = 0.12. Por lo tanto, en el nivel medio de distancia en los datos, cada unidad adicional de arsénico corresponde a una diferencia positiva aproximada del 12% en la probabilidad de cambio.
+
+• Coeficiente del término de interacción: se puede interpretar de dos formas. Mirando desde una dirección, por cada unidad adicional de arsénico, se suma el valor −0,18 al coeficiente de distancia. Ya hemos visto que el coeficiente de distancia es −0,88 en el nivel medio de arsénico, por lo que podemos entender la interacción como diciendo que la importancia de la distancia como predictor aumenta para los hogares con niveles más altos de arsénico existente.
+
+Mirándolo de otra manera, por cada 100 metros adicionales de distancia al pozo más cercano, el valor −0,18 se suma al coeficiente de arsénico. Ya hemos visto que el coeficiente de distancia es 0.47 a la distancia promedio al pozo seguro más cercano, por lo que podemos entender la interacción diciendo que la importancia del arsénico como predictor disminuye para los hogares que están más lejos de los pozos seguros existentes. 
 
 
+# Modelo con interacción considerando las variables centradas
+
+```{r}
+c.dist100 <- dist100 - mean(dist100) 
+c.arsenic <- arsenic - mean(arsenic)
 
 
+fit.5 <- glm (switch ~ c.dist100 + c.arsenic + c.dist100:c.arsenic, 
+              family=binomial(link="logit"))
+
+summary(fit.5)
+
+```
+
+(Se centran los inputs no los predictores)
+
+Interpretando las inferencias en esta nueva escala:
+
+• Término constante: $logit^{−1}(0.35) = 0.59$ es la probabilidad estimada de cambio, si c.dist100 = c.arsénic = 0, es decir, si la distancia al pozo seguro más cercano y el nivel de arsénico están en sus promedios en los datos. (Obtuvimos este mismo cálculo, pero con más esfuerzo, con nuestro modelo anterior con entradas no centradas).
+
+• Coeficiente para la distancia: este es el coeficiente para la distancia (en la escala logit) si el nivel de arsénico está en su valor promedio. Para interpretar esto rápidamente en la escala de probabilidad, dividimos por 4: −0,88 / 4 = −0,22. Por lo tanto, al nivel medio de arsénico en los datos, cada 100 metros de distancia corresponde a un 22% aproximadamente negativo.
+diferencia en la probabilidad de cambio.
+
+• Coeficiente para arsénico: este es el coeficiente para el nivel de arsénico si la distancia al pozo seguro más cercano está en su valor promedio. Para interpretar esto rápidamente en la escala de probabilidad, dividimos por 4: 0.47 / 4 = 0.12. Por lo tanto, en el nivel medio de distancia en los datos, cada unidad adicional de arsénico corresponde a un 12% positivo aproximado.
+diferencia en la probabilidad de cambio.
+
+• Coeficiente del término de interacción: no se modifica con el centrado y tiene la misma interpretación que antes. Las predicciones para nuevas observaciones no se modifican. El centrado lineal de los predictores cambia las interpretaciones de los coeficientes pero no cambia el modelo subyacente.
 
 
+# Adicionando más predictores
+
+```{r}
+educ4 <- educ/4
+fit.6 <- glm(formula = switch ~ c.dist100 + c.arsenic + c.dist100:c.arsenic + 
+               assoc + educ4, family=binomial(link="logit"))
+summary(fit.6)
+```
+
+
+# Se remueve la variable assoc (Si algun miembro del hogar tiene una participacion activa en organizaciones comunitarias)
+
+```{r}
+fit.7 <- glm(formula = switch ~ c.dist100 + c.arsenic + c.dist100:c.arsenic + 
+               educ4, family=binomial(link="logit"))
+summary(fit.7)
+```
+
+
+# Agregando más interacciones
+
+
+```{r}
+
+c.educ4 <- educ4-mean(educ4)
+fit.8 <- glm(formula=switch~c.dist100 + c.arsenic + c.educ4 +
+            c.dist100:c.arsenic + c.dist100:c.educ4 + c.arsenic:c.educ4,
+             family=binomial(link="logit"))
+
+summary(fit.8)
+```
 
 
 

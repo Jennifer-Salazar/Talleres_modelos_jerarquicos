@@ -1,0 +1,2 @@
+"0","barplot(prop.table(table(crab$Sa)), las=1, xlab='Numero de satelites',"
+"0","        ylab='Proporcion', col='white')"

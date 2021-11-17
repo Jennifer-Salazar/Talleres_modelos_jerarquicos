@@ -1,0 +1,200 @@
+---
+title: "Taller sobre capítulo 6 parte 1"
+author: "Jennifer Salazar"
+date: "16/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Preguntas
+
+1. Replicar el ejemplo de modelación del número de satélites (macho) sobre las hembras de cangrejos, visite este enlace.
+
+
+Brockmann (1996), Agresti (1996) y Agresti (2002) analizaron si el cangrejo herradura tenía un cangrejo macho adherido a ella en su nido. El estudio investigó los factores que afectan si la hembra de cangrejo tenía otros machos:
+
+* el color de la hembra de cangrejo (C),
+* condición de la columna vertebral (S),
+* peso (W) en kilogramos,
+* ancho del caparazón (Wt) en centímetros.
+* El resultado de la respuesta para cada cangrejo hembra es su número de satélites (Sa).
+
+
+Hay 173 mujeres en este estudio.
+
+
+```{r}
+#url <- 'https://newonlinecourses.science.psu.edu/stat504/sites/onlinecourses.science.psu.edu.stat504/files/lesson07/crab/index.txt'
+crab <- read.table(file="https://online.stat.psu.edu/onlinecourses/sites/stat504/files/lesson07/crab.txt")
+colnames(crab) <- c("Obs", "C", "S", "W", "Wt", "Sa")
+crab <- crab[, -1] # To eliminate obs
+crab$C <- as.factor(crab$C) # To ensure color as factor
+head(crab)
+```
+
+
+
+```{r}
+barplot(prop.table(table(crab$Sa)), las=1, xlab='Numero de satelites',
+        ylab='Proporcion', col='white')
+```
+
+
+
+
+
+```{r}
+with(crab, plot(x=W, y=Sa, xlab='Ancho caparazon', las=1,
+                ylab='Numero de satelites', pch=20))
+```
+
+
+```{r}
+with(crab, plot(x=Wt, y=Sa, xlab='Peso de la hembra', las=1,
+                ylab='Numero de satelites', pch=20))
+```
+
+
+Para este ejemplo vamos a considerar tres modelos:
+
+Poisson
+Binomial negativa
+ZIP (zero inflated Poisson)
+Se va a utilizar el GAIC=−2×LogLik+k×npar para seleccionar los modelos. Entre menor GAIC mejor es el modelo.
+
+Nota:
+- Si k=2 el GAIC es el AIC usual.
+- Si k=log(n) el GAIC es el BAIC.
+
+
+# Ajustando los modelos
+
+* Poisson
+
+
+```{r}
+library(gamlss)
+mod.p <- gamlss(Sa ~ 1, data=crab, family=PO)
+```
+
+Selección de variables
+
+
+```{r}
+sup <- formula(~ W + Wt + C)
+n <- nrow(crab) # numero de observaciones
+mod.p.final <- stepGAICAll.A(mod.p, trace=F, k=log(n),
+                             scope=list(lower=~1, upper=sup))
+```
+
+tabla de resumen es:
+
+
+```{r}
+summary(mod.p.final)
+```
+
+
+* Binomial Negativa
+
+```{r}
+mod.nb <- gamlss(Sa ~ 1, data=crab, family=NBI)
+```
+
+Selección de variables:
+
+```{r}
+mod.nb.final <- stepGAICAll.A(mod.nb, trace=F, k=log(n),
+                              scope=list(lower=~1, upper=sup),
+                              sigma.scope=list(lower=~1, upper=sup))
+```
+
+Tabla de resumen es:
+
+
+```{r}
+summary(mod.nb.final)
+```
+
+* ZIP
+
+
+```{r}
+mod.zip <- gamlss(Sa ~ 1, data=crab, family=ZIP)
+```
+
+Selección de variables:
+
+```{r}
+mod.zip.final <- stepGAICAll.A(mod.zip, trace=F, k=log(n),
+                               scope=list(lower=~1, upper=sup),
+                               sigma.scope=list(lower=~1, upper=sup))
+```
+
+
+La tabla de resumen es:
+
+```{r}
+summary(mod.zip.final)
+```
+
+
+
+# Gráfico de residuales
+
+
+* Modelo Poisson
+
+```{r}
+plot(mod.p.final)
+```
+
+
+* Modelo binomial negativo
+
+```{r}
+plot(mod.nb.final)
+```
+
+* Modelo ZIP
+
+
+```{r}
+plot(mod.zip.final)
+```
+
+## Worm plot
+
+
+```{r}
+par(mfrow=c(2, 2))
+wp(mod.p.final)  ; title('Poisson')
+wp(mod.nb.final) ; title('Binomial negativo')
+wp(mod.nb.final) ; title('ZIP')
+```
+
+```{r}
+GAIC(mod.p.final, mod.nb.final, mod.zip.final)
+```
+
+              df      AIC
+mod.zip.final  4 733.7801
+mod.nb.final   4 735.1283
+mod.p.final    2 920.1405
+
+
+El mejor modelo es porque tiene el valor de GAIC mas pequeño.
+
+
+.......... Continuar con el notebook.
+
+
+
+
+
+
+
+

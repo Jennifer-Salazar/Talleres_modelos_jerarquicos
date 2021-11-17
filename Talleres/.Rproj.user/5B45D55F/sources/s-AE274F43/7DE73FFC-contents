@@ -1,0 +1,93 @@
+# Simulación glm Bernoulli
+
+# Modelo: Y~Binomial(m=1, pi) con logit(pi) = b0 + b1 * x
+# con x ~ U(0, 1)
+# con b0=-1 y b1=1
+
+# Funcion para generar los datos
+gen_dat <- function(n, b0, b1) {
+  x <- runif(n=n)
+  eta <- b0 + b1 * x
+  pi <- exp(eta) / (1 + exp(eta))
+  y <- rbinom(n=n, size=1, prob=pi)
+  data.frame(y=y, x=x)
+}
+
+# Generando los datos
+n <- 100
+datos <- gen_dat(n=n, b0=-1, b1=1)
+head(datos)
+
+# Ajustado el modelo
+mod <- glm(y ~ x, data=datos, family=binomial(link='logit'))
+summary(mod)
+coef(mod)     # Los valores estimados son cercanos a los verdaderos
+
+######################################################################
+
+# Simulación glm Binomial - éxitos fracasos
+
+
+# Modelo: Y ~ Binomial(m=10, pi) con logit(pi) = b0 + b1 * x
+# con b0=-1 y b1=1
+
+# Funcion para generar los datos
+gen_dat <- function(n, b0, b1) {
+  x <- runif(n=n)
+  eta <- b0 + b1 * x
+  pi <- exp(eta) / (1 + exp(eta))
+  y <- rbinom(n=n, size=10, prob=pi)
+  data.frame(y=y, x=x)
+}
+
+# Generando los datos
+n <- 100
+datos <- gen_dat(n=n, b0=-1, b1=1)
+head(datos)
+
+# Curioseando los valores de y
+barplot(table(datos$y))
+
+# Reto --------------------------------------------------------------------
+
+# Ajustar el modelo para recuperar los parametros
+m <- rep(10, times=n) # el valor maximo de la binomial de interes
+mod <- glm(cbind(y, m-y) ~ x, data=datos, family=binomial)
+
+summary(mod)
+coef(mod)
+
+
+######################################################################
+
+# Simunación glm Poisson
+
+
+# Modelo: Y~Poisson(lambda) con log(lambda) = b0 + b1 * x
+# con b0=-1 y b1=2
+# la covariable x ~ U(0, 1)
+
+# Funcion para generar los datos
+gen_dat <- function(n, b0, b1) {
+  x <- runif(n=n, min=0, max=1)
+  lambda <- exp(b0 + b1 * x)
+  y <- rpois(n=n, lambda=lambda)
+  data.frame(y=y, x=x)
+}
+
+# Generando los datos
+n <- 150
+datos <- gen_dat(n=n, b0=-1, b1=2)
+head(datos)
+
+# Exploremos los datos
+library(ggplot2)
+
+ggplot(datos, aes(x=x, y=y)) + 
+  geom_point()
+
+# Ajustado el modelo
+mod <- glm(y ~ x, data=datos, family=poisson(link="log"))
+summary(mod)
+coef(mod)     # Los valores estimados son cercanos a los verdaderos
+

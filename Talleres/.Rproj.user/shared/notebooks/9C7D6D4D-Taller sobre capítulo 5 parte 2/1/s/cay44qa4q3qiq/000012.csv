@@ -1,0 +1,1 @@
+"0","curve (invlogit (cbind (1,.5, x) %*% coef(fit.3)), add=TRUE)"

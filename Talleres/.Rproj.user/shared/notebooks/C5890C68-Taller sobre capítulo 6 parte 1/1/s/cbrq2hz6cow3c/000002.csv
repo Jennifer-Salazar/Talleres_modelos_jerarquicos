@@ -1,0 +1,2 @@
+"0","with(crab, plot(x=W, y=Sa, xlab='Ancho caparazon', las=1,"
+"0","                ylab='Numero de satelites', pch=20))"

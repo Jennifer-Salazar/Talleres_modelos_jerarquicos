@@ -1,0 +1,7 @@
+"0","n <- 500"
+"0","x <- runif(n=n, min=-5, max=6)"
+"0","media <- 4 - 6*x"
+"0","sigma2 <- 16"
+"0","y <- rnorm(n=n, media, sqrt(sigma2))"
+"0","datos <- data.frame(y=y, x=x)"
+"0",""
