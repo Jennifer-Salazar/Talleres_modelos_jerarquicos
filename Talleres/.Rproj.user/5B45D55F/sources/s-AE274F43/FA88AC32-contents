@@ -1,0 +1,507 @@
+---
+title: 'Tarea 5 Introducción al manejo de datos categóricos'
+author: "Jennifer Salazar"
+date: ""
+output:
+  prettydoc::html_pretty:
+    theme: leonids
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<div style="text-align: justify">
+
+```{r, echo=F}
+#Nota: para que todos los codigos de este sript funcionen se debe cargar previamente la tarea 4.
+library(kableExtra)
+
+#Cargar datos iniciales 
+load("datos.RData")
+
+#Cargar datos con variables economicas
+load("datos_final.RData")
+```
+
+<center> <h2> Problema a resolver </center> </h2>
+
+
+Considere la tabla donde cruza resultado con la variable riqueza del colegio. Realice la prueba de homogeneidad donde la variable es resultado y el estrato es nivel de riqueza del colegio.
+
+<br>
+
+
+**Inicialmente se cuenta con el siguiente conjuntos de datos:**
+
+
+### Conjunto de datos:
+
+
+La base de datos a analizar es una recopilación de información de los estudiantes que presentan las prueba saber **ICFES** en el periodo académico 2013-2.
+
+El Examen de Estado de la Educación Media - Saber 11º, conocido popularmente como Examen ICFES, es una prueba estandarizada aplicada por el ICFES a los estudiantes que se encuentran en el último año de educación media en Colombia (usualmente grado undécimo) con el fin de otorgarles resultados oficiales que les permita acceder a la educación superior. El examen es bastante reconocido a nivel nacional y es ampliamente utilizado por universidades privadas y públicas como criterio de admisión.
+
+Esta base de datos contiene información personal, familiar, académica, socioeconómica, etc. de los estudiantes que presentan la prueba con el fin de hacer análisis de estas variables en relación al puntaje obtenido en la prueba:
+
+
+
+<br>
+
+**A partir de este conjunto de datos se crearon dos variables categoricas que se contextualizan a continuación:**
+
+
+
+<center> <h2> Variable resultado </h2> </center>
+
+
+Es una variable creada a partir de otra variable contenida en el conjunto de datos mencionado anteriormente, esta variable se llama _ESTU_PUESTO_ que indica el puesto que ocupa del 1 al 1000 cada uno de los estudiantes que realizaron la prueba SABER ICFES (Varios estudiantes pueden ocupar el mismo puesto), de tal manera que lo que realiza esta variable **resultado** es categorizar en grupo de a 100 los puestos ocupados es decir, crea un nivel para los puestos del 1 al 100, otro para los puestos del 100 al 200 y así sucesivamente hasta el 1000 de tal manera que resultan 10 niveles para esta variable.
+
+
+(Entre menor valor tome la variable **resultado** hace referencia que al estudiante tuvo mejores resultados en la prueba, en donde 1 es el mejor y 1000 es el peor puesto a ocupar.)
+
+**Visualicemos esta variable a continuación, cada uno de sus niveles y sus respectivas frecuencias:**
+
+```{r, echo=F}
+resultado<-cut(datos_final$ESTU_PUESTO,breaks=(0:10)*100)
+```
+
+```{r, echo=FALSE}
+kable(table(resultado)) %>%
+  kable_paper(full_width = F)
+```
+
+
+**Gráfico de frecuencias de la variable resultado**
+
+```{r, fig.align="center", echo=F}
+par(mar=c(6,4,4,4))
+barplot(table(resultado), col="cyan4", main="Frecuencias de los niveles de la variable resultado", las=2)
+```
+
+
+
+* Cabe notar que la frecuencia de estudiantes en cada uno de los niveles de la variable **resultado** parece ser uniforme, esto se debe a la estructura de asignación de puestos que realiza la prueba Saber ICFES donde se consideran muchos grupos de a 1000 estudiantes y a cada uno se le asigna un puesto de los 1000, de tal manera que para cada grupo de 1000 estudiantes existe alguien que ocupa los puestos 1, el 2 y así sucesivamente.
+
+<br>
+
+
+<center> <h2> Variable Riqueza del colegio </h2> </center>
+
+
+A cada uno de los estudiantes que presentaron la prueba saber ICFES se le asignó un índice que indica la economía del mismo, el cual tiene niveles del 1 al 10, donde 1 son los estudiantes más pobres y 10 son los estudiantes más ricos.
+
+Posteriormente a cada colegio se le hayo un índice en base al promedio del índice de economía de todos los estudiantes que pertenecen a dicho colegio.
+
+Luego de que cada colegio tuviera su respectivo índice, se realizó un análisis mediante deciles, para saber cuáles eran el 10% de los colegios más pobres, los siguientes 10% con la economía que seguía, así sucesivamente hasta llegar al 10% de los colegios más ricos, es decir se crearon 10 categorías o grupos en donde en cada una se tenía los colegios según su economía, donde el grupo 1 pertenecían el 10% de los colegios más pobres y el grupo 10 pertenecían el 10% de los colegios más ricos.
+
+
+Después de realizar todo esto, se creó una nueva variable que es la llamada **Riqueza del colegio** la cual es asignada a cada uno de los estudiantes, que corresponde al índice en el cual quedo categorizado o agrupado el colegio en el cual pertenece, es decir, por ejemplo, si el colegio del estudiante quedo en el grupo 1(10% de los colegios más pobres) a el estudiante se le asigna el índice 1 que indica que pertenece al grupo 1 en la riqueza del establecimiento, es decir al grupo de los colegios más pobres.
+
+Por lo tanto, cada estudiante finalmente queda con un índice de su propia economía y con otro que indica la economía del establecimiento o colegio al cual pertenece.
+
+
+**Visualicemos esta variable a continuación, cada uno de sus niveles y sus respectivas frecuencias:**
+
+```{r, echo=F}
+riqueza_colegio <- datos_final$grupo
+```
+
+
+```{r, echo=FALSE}
+kable(table(riqueza_colegio)) %>%
+  kable_paper(full_width = F)
+```
+
+
+**Gráfico de frecuencias de la variable riqueza del colegio**
+
+
+```{r, fig.align="center", echo=F}
+par(mar=c(4,4,4,4))
+barplot(table(riqueza_colegio), col="cyan4", main="Frecuencias de la variable riqueza del colegio", ylab="frecuencias", xlab="niveles")
+```
+
+
+
+* Cabe notar que las mayores frecuencias de estudiantes se presentan en los niveles del 5 a 8 de **riqueza del colegio**, inicialmente en cada uno de los niveles hay aproximadamente el mismo número de colegios, pero las frecuencias mostradas previamente son por estudiantes, indicando que se acumulan mayor número de estudiantes en los niveles más alto de la variable riqueza del colegio, esto puede deberse a que entre mayor sea la riqueza del colegio, cuenta con mayor número de estudiantes ya que su economía se lo permite.
+
+<hr>
+<br>
+
+<center> <h2> tabla que cruza riqueza del colegio vs. resultado </h2> </center>
+
+En la siguiente tabla se muestra los niveles de la variable **riqueza del colegio** como los nombres de las filas y los niveles de la variable **resultado** como los nombres de las columnas
+
+
+
+```{r, echo=FALSE}
+# $$\begin{array}{| c | c | c | c | c |}
+# \hline
+# & (0,100] & (100,200] & (200,300] & (300,400] & (400,500] & (500,600] & (600,700] & (700,800] & (800,900] & (900,1000] \\ 
+#   \hline
+# 1 & 542 & 1053 & 1434 & 1819 & 2297 & 2781 & 3167 & 3664 & 4318 & 4883 \\ 
+#   2 & 761 & 1630 & 2220 & 2806 & 3335 & 3914 & 4389 & 5091 & 5711 & 6065 \\ 
+#   3 & 1017 & 2039 & 2778 & 3356 & 3914 & 4578 & 5124 & 5684 & 6209 & 6798 \\ 
+#   4 & 1982 & 3510 & 4505 & 5219 & 5844 & 6233 & 6760 & 7107 & 7295 & 7331 \\ 
+#   5 & 2713 & 4636 & 5530 & 6446 & 6908 & 7105 & 7454 & 7844 & 7915 & 7857 \\ 
+#   6 & 4198 & 6515 & 7594 & 7885 & 8073 & 8288 & 8359 & 8091 & 7956 & 7314 \\ 
+#   7 & 6280 & 8851 & 9423 & 9413 & 9144 & 8743 & 8443 & 7565 & 7160 & 6221 \\ 
+#   8 & 8408 & 9909 & 9643 & 8870 & 8106 & 7507 & 6551 & 5940 & 5033 & 4318 \\ 
+#   9 & 9491 & 8404 & 6943 & 5752 & 4790 & 4053 & 3401 & 2892 & 2406 & 1835 \\ 
+#   10 & 19197 & 8455 & 4955 & 3449 & 2440 & 1756 & 1248 & 999 & 827 & 620 \\ 
+#  \hline
+# \end{array}$$
+```
+
+
+
+
+
+<center>
+![](tabla_contingencia.png)
+</center>
+
+
+
+* Mediante la tabla se percibe que 542 estudiantes cuyos colegios tienen el nivel de riqueza más bajo y ocuparon los primeros puestos en la prueba saber ICFES, mientras que 4883 ocuparon los últimos puestos.
+
+* Por otro lado, mediante la tabla se percibe 19197 estudiantes cuyos colegios tienen el nivel de riqueza más alto ocuparon los primeros puestos en la prueba saber ICFES, mientras que 620 ocuparon los últimos puestos.
+
+
+* Observando los niveles más bajos de la variable riqueza del colegio se puede notar que hay mayor frecuencia de estudiantes en los niveles más altos de la variable resultado, que en los niveles más bajos, es decir, ocupan los últimos puestos en la prueba saber ICFES.
+
+* Observando los niveles más altos de la variable riqueza del colegio se puede notar que hay mayor frecuencia de estudiantes en los niveles más bajos de la variable resultado, que en los niveles más altos, es decir, ocupan los primeros puestos en la prueba saber ICFES.
+
+Las dos últimas conclusiones indican que la economía del colegio al cual pertenecen los estudiantes tiene asociación con los resultados en la prueba icfes, en donde los colegios más pobres tienden a irles peor en la prueba y a los colegios más ricos tienden a irles mejor en la prueba, esto puede estar directamente relacionado con la calidad de estudio que tienen la oportunidad de brindar los colegios en base a la economía que tienen.
+
+<hr>
+
+<center> <h1> Prueba de homogeneidad </h1> </center>
+
+
+**Objetivo de la prueba: ** se utiliza cuando se tienen varias muestras independientes de n individuos que se clasifican respecto a una variable cualitativa y se desea conocer a partir de datos muestrales, si provienen de la misma población (el objetivo es comparar diferentes muestras).
+
+
+Es decir, en esta prueba se tienen varias muestras independientes correspondientes a las categorías de una de las variables y se clasifican las observaciones respecto a la otra variable. La prueba tiene la finalidad de conocer si la distribución de la variable estudiada **resultado** difiere en las poblaciones o estratos de la variable **riqueza del colegio**.
+
+Para hacer la prueba se considera que se tienen niveles en la variable **resultado** y la variable **riqueza del colegio** que vienen de muestras independientes.
+
+En este caso se va a considerar como variable a **resultado** y como estratos los diferentes niveles de la variable **riqueza del colegio**
+
+
+
+### Prueba LRT de homogeneidad (Razón de verosimilitud)
+
+
+La prueba de homogeneidad lo que nos dice es si las poblaciones multinomiales, se puede asumir que tienen la misma distribución de probabilidad, es decir si para cada estrato de la variable riqueza del colegio, la población multinomial compuesta por cada uno de los niveles de la variable resultado tienen la misma distribución de probabilidad.
+
+Cada fila de la variable riqueza del colegio tiene una distribución multinomial con 10 categorías (niveles de la variable resultado), donde una categoría es considerada como la combinación de dos variables (resultado y riqueza del colegio).
+
+
+
+**Bajo el modelo irrestrictivo los e.m.v son**
+
+$$\hat{\pi}_{ij}=\frac{n_{ij}}{n_{i+}}, ~~ para~~i=1,2,..., 10~~~j=1,2,...,10$$
+
+**Bajo Ho**
+
+
+$$\hat{\pi}_{ij0}=\frac{n_{i+}}{n_{++}}, ~~ para~~i=1,2,..., 10~~~j=1,2,...,10$$
+
+($H_0:$ hay homogeneidad entre los grupos respecto a los niveles de la
+variable, hay igualdad entre la proporción de elementos de cada grupo que caen en la mismo nivel de la variable)
+
+
+donde $n_{..}$ hace referencia a número de estudiantes o frecuencias obtenidas de la tabla de contingencia y $\hat{\pi}_{..}$ hace referencia a probabilidades o proporciones hallada mediante la misma tabla de contingencia, para ser más puntuales visualice las siguientes tablas que ejemplifican mejor:
+
+<center>
+![](tablas.png)
+donde $S, R=10$
+
+Esta prueba lo que considera es si los $\pi$ en cada categoria, en cada una de las poblaciones multinomiales son los mismos.
+
+</center>
+
+
+
+
+
+La pruba de homogeneidad simplemente nos permite verificar si las probabilidades de cada columna(niveles de resultado) son iguales para todos los niveles de la variable riqueza del colegio, en el caso de que las probabilidades sean iguales no se tiene que considerar la variable riqueza del colegio, para estudiar la variable de interes resultado en la prueba Saber ICFES.
+
+<br>
+
+**Procedimiento de la prueba LRT**
+
+**Paso 1.** se realiza una suma de las columnas de la tabla de contingencia mostrada previamente
+
+```{r, echo=F}
+# Variable que contiene la tabla de contingencia considerada
+N <- table(riqueza_colegio, resultado)
+```
+
+
+```{r, echo=F}
+N.mas<-colSums(N)
+```
+
+```{r, echo=F}
+# $$\begin{array}{| c | c | c | c | c |}
+# \hline
+# (0,100] & (100,200] & (200,300] & (300,400] & (400,500] & (500,600] & (600,700] & (700,800] & (800,900] & (900,1000] \\ 
+#   \hline
+# 54589 & 55002 & 55025 & 55015 & 54851 & 54958 & 54896 & 54877 & 54830 & 53242 \\
+#  \hline
+# \end{array}$$
+```
+
+
+
+
+<center>
+![](sum_columnas.png)
+</center>
+
+
+
+* En la primera columna tenemos 54589 estudiantes que ocuparon los primeros 100 puestos en la prueba saber ICFES.
+
+* En la última columna tenemos 53242 estudiantes que ocuparon los últimos 100 puestos en la prueba saber ICFES.
+
+<br>
+
+**Paso 2.** Se halla la distribución de probabilidad estimada bajo el modelo de homogeneidad(En donde todos los niveles de riquezas del colegio tienen la misma distribución de probabilidad)
+
+```{r, echo=F}
+prob.0<-N.mas/sum(N.mas)
+```
+
+
+```{r, echo=FALSE}
+# $$\begin{array}{| c | c | c | c | c |}
+# \hline
+# (0,100] & (100,200] & (200,300] & (300,400] & (400,500] & (500,600] & (600,700] & (700,800] & (800,900] & (900,1000] \\ 
+#   \hline
+#  0.0997 & 0.1005 & 0.1005 & 0.1005 & 0.1002 & 0.1004 & 0.1003 & 0.1003 & 0.1002 & 0.0973 \\ 
+#  \hline
+# \end{array}$$
+```
+
+
+
+<center>
+![](probabilidades.png)
+</center>
+
+
+
+* Se esperaba a que hubiera alrededor de un 10% de estudiantes en cada uno de los niveles de la variable resultado sin discriminar por el nivel de riqueza del colegio, esto debido a la estructura uniforme que tiene la variable resultado.
+
+Si no rechazo el modelo de homogeneidad implica que esta distribución aplica a cada nivel de la variable riqueza del colegio.
+
+<br>
+
+**Paso 3.** Se calculan los valores esperados bajo el modelo de homogeneidad.
+
+
+El valor esperado estimado es el tamaño muestral que hay en cada estrato multiplicado por la probabilidad bajo la hipótesis nula (homogeneidad), entonces si el modelo fuera cierto, el valor esperado se calcularia así:
+
+$$Bajo~ H_0~ el~valor~esperado~de~la~i-j~esima ~celda ~es$$
+
+$$e_{ij}=n_{i+}\hat{\pi}_{ij0}$$
+
+
+```{r, echo = F}
+N.filas<-rowSums(N)
+```
+
+
+```{r, echo=F}
+esperados<-matrix(N.filas,ncol=1)%*%matrix(prob.0,nrow=1)
+```
+
+### Tabla de valores esperados
+
+```{r, echo=F}
+# $$\begin{array}{| c | c | c | c | c |}
+# \hline
+# & (0,100] & (100,200] & (200,300] & (300,400] & (400,500] & (500,600] & (600,700] & (700,800] & (800,900] & (900,1000] \\
+#   \hline
+# 1 & 2589.18 & 2608.77 & 2609.86 & 2609.39 & 2601.61 & 2606.69 & 2603.74 & 2602.84 & 2600.61 & 2525.29 \\
+#   2 & 3583.04 & 3610.15 & 3611.66 & 3611.00 & 3600.24 & 3607.26 & 3603.19 & 3601.95 & 3598.86 & 3494.63 \\
+#   3 & 4139.12 & 4170.44 & 4172.18 & 4171.42 & 4158.99 & 4167.10 & 4162.40 & 4160.96 & 4157.40 & 4036.99 \\
+#   4 & 5564.38 & 5606.48 & 5608.82 & 5607.80 & 5591.09 & 5601.99 & 5595.67 & 5593.74 & 5588.95 & 5427.08 \\
+#   5 & 6424.38 & 6472.99 & 6475.69 & 6474.52 & 6455.22 & 6467.81 & 6460.51 & 6458.28 & 6452.75 & 6265.86 \\
+#   6 & 7408.37 & 7464.42 & 7467.54 & 7466.18 & 7443.92 & 7458.45 & 7450.03 & 7447.45 & 7441.07 & 7225.56 \\
+#   7 & 8103.59 & 8164.90 & 8168.31 & 8166.83 & 8142.48 & 8158.37 & 8149.16 & 8146.34 & 8139.37 & 7903.63 \\
+#   8 & 7409.57 & 7465.62 & 7468.75 & 7467.39 & 7445.13 & 7459.65 & 7451.24 & 7448.66 & 7442.28 & 7226.73 \\
+#   9 & 4983.96 & 5021.67 & 5023.77 & 5022.86 & 5007.88 & 5017.65 & 5011.99 & 5010.26 & 5005.97 & 4860.98 \\
+#   10 & 4383.40 & 4416.56 & 4418.41 & 4417.61 & 4404.44 & 4413.03 & 4408.05 & 4406.52 & 4402.75 & 4275.24 \\
+#  \hline
+# \end{array}$$
+
+```
+
+
+
+
+<center>
+![](esperados.png)
+</center>
+
+
+
+* A simple vista los valores esperados bajo el supuesto de homogeneidad son muy diferentes a los valores reales, que se visualizan en la tabla de contingencia inicial, dado que la original contempla que para los niveles más bajo de la variable riqueza del colegio hay mayor número de estudiantes en los últimos niveles de la variable resultado  y para los niveles más altos de la variable riqueza del colegio hay mayor número de estudiantes en los primeros niveles de la variable resultado, dando una relación entre la economía del colegio con el resultado en la prueba, lo cual no es plasmado en los valores esperados bajo el supuesto de homogeneidad, el cual para todos los niveles de riqueza, coloca casi la misma frecuencia de estudiantes en todos los niveles de la variable resultado, indicando que para todos los niveles de la variable riqueza del colegio, los estudiantes ocuparon todos los puestos en la prueba saber ICFES de una manera uniforme.
+
+
+
+**Sumas de las columnas de la tabla de valores esperados**
+
+Estas deben de coincidir con las de la tabla de contingencia real
+
+
+```{r, echo=FALSE}
+# $$\begin{array}{| c | c | c | c | c |}
+# \hline
+# (0,100] & (100,200] & (200,300] & (300,400] & (400,500] & (500,600] & (600,700] & (700,800] & (800,900] & (900,1000] \\ 
+#   \hline
+# 54589 & 55002 & 55025 & 55015 & 54851 & 54958 & 54896 & 54877 & 54830 & 53242 \\
+#  \hline
+# \end{array}$$
+```
+
+
+
+
+<center>
+![](sum_columnas.png)
+</center>
+
+
+<br>
+
+**Paso 4** Calculo del estadístico de prueba asociado a la prueba de hipotesis de homogeneidad y calculo del valor p (mediante una $\chi^2$)
+
+**Estadístico de prueba**
+
+$$-2~n_{ij}~log\sum_{i=1}^{10}\sum_{j=1}^{10}\left(\frac{e_{ij}}{n_{ij}}\right)$$
+
+El cual toma un valor de:
+
+
+$$105577.9$$
+<br>
+
+
+**Valor-P**
+
+$$P(\chi^2_{(10-1)(10-1)}>998.918)$$
+
+el cual toma un valor de:
+
+$$Valor~p =0$$
+
+Como el $valor ~ p <0.05$ se rechaza $H_0$ es decir la hipotesis de homogeneidad, lo cual indica de que hay evidencia estadística para decir que en al menos uno de los niveles de la variable **riqueza del colegio** la distribución de los niveles de la variable resultados es diferente.
+
+
+### Conclusiones:
+
+
+* Entre la economía del estudiante y del colegio al cual pertenece con la variable resultado que indica el puesto ocupado en la prueba SABER ICFES se dice que hay una relación en donde obtienen mejores resultados estudiantes con una economía más alta, dado que tienen la oportunidad de recibir un estudio de mayor calidad, esto se podría explicar debido a que un colegio al tener mejores condiciones económicas puede generar espacios para que los estudiantes se desarrollen de diversas formas y aprendan de diferentes formas, además de que la contratación de profesores más especializados en enseñanza es más factible.
+
+* Que la hipótesis nula sea rechazada (homogeneidad rechazada) lleva a pos estratificaciones de la base de datos.
+
+* Cuando uno ve tablas de contingencia se le pueden ocurrir muchas preguntas a partir de ella y en la que nos hemos centrado principalmente en este estudio es la mencionada en la conclusión anterior de la relación que entre mejor sea la economía mejores son los resultados en la prueba, pero debido al rechazo de la homogeneidad se puede entrar a estudiar, cuestiones como, que niveles de la variable riqueza del colegio difieren, si existen unos que difieren y otros que son similares, o realmente todos difieren entre si respecto a la variable resultado.
+
+* También se puede abrir el estudio que ayude a mirar cuales otras variables tienen relación con los resultados en la prueba Icfes aparte del nivel de riqueza del colegio, como lo pueden ser si el colegio es de una zona rural o urbana, el tipo de calendario del mismo y si este es privado o público, el cual este último se espera tenga una gran relación con la variable riqueza del colegio, ya que los colegios privados son los que tienen a ocupar los niveles más altos de esta.
+
+
+<hr>
+
+
+<br>
+
+### Sección de códigos en R
+
+```{r, eval=FALSE}
+# Código que crea la variable resultado
+resultado<-cut(datos_final$ESTU_PUESTO,breaks=(0:10)*100)
+```
+
+```{r, eval=FALSE}
+#Tabla de frecuencias de la variable resultado
+table(resultado)
+```
+
+
+```{r, fig.align="center", eval=FALSE}
+# Gráfico de frecuencias de la variable resultado
+barplot(table(resultado), col="cyan4", main="Frecuencias de los niveles de la variable resultado", ylab="frecuencias", las=2)
+```
+
+
+```{r, eval=FALSE}
+# Tabla de frecuencias de la variable riqueza del colegio
+table(riqueza_colegio)
+```
+
+
+
+```{r, fig.align="center", eval=F}
+# Gráfico de frecuencias de la variable riqueza del colegio
+barplot(table(riqueza_colegio), col="cyan4", main="Frecuencias de la variable riqueza del colegio", ylab="frecuencias", xlab="niveles")
+```
+
+
+```{r, eval=F}
+# Tabla de contingencia usada para el análisis
+table(riqueza_colegio, resultado)
+```
+
+
+```{r, eval=F}
+# Variable que contiene la tabla de contingencia considerada
+N <- table(riqueza_colegio, resultado)
+```
+
+
+```{r, eval=F}
+# Calculo de la suma de las columnas
+N.mas<-colSums(N)
+```
+
+
+```{r, eval=F}
+# distribuciones de probabilidades
+prob.0<-N.mas/sum(N.mas)
+```
+
+
+```{r, eval = F}
+# Suma de las filas (por nivel de riqueza)
+N.filas<-rowSums(N)
+```
+
+```{r, eval=F}
+# valores esperados bajo el modelo de homogeneidad
+esperados<-matrix(N.filas,ncol=1)%*%matrix(prob.0,nrow=1)
+esperados
+```
+
+```{r, eval=F}
+#Suma de las columnas es tabla de valores esperados bajo el modelo de homogeneidad
+colSums(esperados)
+```
+
+
+```{r, eval=F}
+# Estádistico de prueba
+estadistico <- -2*sum(N*log(esperados/N))
+estadistico
+
+#valor p
+pchisq(estadistico, (10-1)*(10-1),lower.tail=F)
+```
+
+
+</div>

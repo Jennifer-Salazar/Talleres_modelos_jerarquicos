@@ -1,0 +1,5 @@
+"0","kidiq_hs_0 <- kidiq[kidiq$mom_hs==0]
+"
+"2","Error in `[.data.frame`(kidiq, kidiq$mom_hs == 0) : 
+  undefined columns selected
+"

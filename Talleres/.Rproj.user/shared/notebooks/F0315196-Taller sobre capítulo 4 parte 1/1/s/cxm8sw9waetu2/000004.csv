@@ -1,0 +1,13 @@
+"0","library(haven)"
+"0","kidiq <- read_dta(""Datos/ARM_Data/child.iq/kidiq.dta"")"
+"0","attach(kidiq)"
+"2","The following objects are masked from kidiq (pos = 3):
+
+    kid_score, mom_age, mom_hs, mom_iq, mom_work
+
+"
+"2","The following objects are masked from kidiq (pos = 7):
+
+    kid_score, mom_age, mom_hs, mom_iq, mom_work
+
+"

@@ -1,0 +1,3 @@
+"0",""
+"0","# Para agregar el plano usamos $plane3d( ) con argumento modelo ajustado"
+"0","#mi_3d$plane3d(mod_final, lty.box=""solid"", col='mediumblue')"

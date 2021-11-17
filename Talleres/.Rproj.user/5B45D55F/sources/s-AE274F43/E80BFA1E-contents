@@ -1,0 +1,101 @@
+---
+title: "Taller sobre capítulo 5 parte 2"
+author: "Jennifer Salazar"
+date: "16/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Preguntas
+1. Replicar el ejemplo de la sección 5.4 “Wells in Bangladesh”.
+
+
+modelando las decisiones de los hogares en Bangladesh sobre si cambiar su fuente de consumo de agua.
+
+Y=0 si no cambian
+Y=1 si van a cambiar
+
+
+```{r}
+library(haven)
+wells <- read.table("Datos/ARM_Data/arsenic/wells.dat") 
+attach(wells)
+```
+
+
+* Regresión logística con un solo predictor
+
+```{r}
+fit.1 <- glm(switch ~ dist, family=binomial(link="logit"))
+summary(fit.1)
+```
+
+El coeficiente para dist es −0,0062, que parece bajo, pero esto es engañoso ya que la distancia se mide en metros, por lo que este coeficiente corresponde a la diferencia entre, digamos, una casa que está a 90 metros del pozo seguro más cercano y una casa que está a 91 metros de distancia.
+
+
+Parece más razonable cambiar la escala de la distancia en unidades de 100 metros:
+
+```{r}
+dist100 <- dist/100
+```
+
+
+*Se ajusta nuevamente el modelo con la variable distancia reescalada
+
+```{r}
+fit.2 <- glm(formula = switch ~ dist100, family=binomial(link="logit"))
+summary(fit.2)
+```
+
+
+* Gráfica del modelo ajustado
+
+
+```{r}
+invlogit <- function(x){
+  1/(1+exp(-x))
+}
+
+jitter.binary <- function(a, jitt=.05){ 
+  ifelse (a==0, runif(length(a), 0, jitt), runif(length(a), 1-jitt, 1))
+}
+
+
+switch.jitter <- jitter.binary(switch) 
+plot(dist, switch.jitter)
+curve(invlogit (coef(fit.1)[1] + coef(fit.1)[2]*x), add=TRUE)
+```
+
+El resultado se muestra en la Figura 5.9. La probabilidad de cambio es de aproximadamente el 60% para las personas que viven cerca de un pozo seguro, y se reduce a aproximadamente el 20% para las personas que viven a más de 300 metros de cualquier pozo seguro. Esto tiene sentido: la probabilidad de cambiar es mayor para las personas que viven más cerca de un pozo seguro.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. ¿Dónde está ubicado Bangladesh?
+
+
+BANGLADESH. Estado de Asia que limita, al Sur con la bahía de Bengala, al Norte, NE y NO con la Unión India y al SE con Birmania. Físicamente está constituido por una llanura aluvional regada por los ríos Ganges, Meghna y Bramaputra; sólo en el sudeste se encuentra una cordillera de pequeñas montañas.
+

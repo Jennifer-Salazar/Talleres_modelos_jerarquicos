@@ -1,0 +1,3 @@
+"0","        "
+"0","plot (jitter.mom_hs, kidscore.jitter, xlab=""Mother completed high school"","
+"0","  ylab=""Child test score"", pch=20, xaxt=""n"", yaxt=""n"")"

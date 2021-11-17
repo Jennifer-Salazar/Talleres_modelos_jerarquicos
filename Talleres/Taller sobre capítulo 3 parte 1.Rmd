@@ -1,0 +1,317 @@
+---
+title: "Taller 1"
+author: "Jennifer Salazar"
+date: "23/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(haven)
+kidiq <- read_dta("Datos/ARM_Data/child.iq/kidiq.dta")
+attach(kidiq)
+```
+
+
+
+## Preguntas
+
+En este taller vamos a retomar el ejemplo del capítulo 3 sobre modelos de regresión para explicar el puntaje de una prueba cognitiva (kid_score) en niños de 3 y 4 años en función de la información de la madre de cada uno de los niños
+
+
+1. Explore la base de datos kidiq. ¿Cuántas variables y cuántas observaciones tiene la base de datos?
+
+(Preguntar por que no puedo hacer head(kidiq)???)
+
+```{r}
+#Exploración de los datos
+
+View(kidiq)
+
+
+dim(kidiq)
+```
+
+* El conjunto de datos tiene 5 variables y 434 observaciones.
+
+
+2. ¿Cuántas de las covariables tienen información sobre la madre del niño?
+
+Los nombres de las variables se presentan a continuación:
+
+```{r}
+names(kidiq)
+```
+
+Por lo tanto 4 de las 5 covariables contienen información de la madre y son:
+
+* "mom_hs"    
+* "mom_iq"    
+* "mom_work"  
+* "mom_age"
+
+
+3. Replique en su computador las figuras 3.1, 3.2 y 3.3.
+
+
+Modelo 1: kid score vs mom_hs
+
+```{r}
+mod1 <- lm(kid_score~mom_hs, data=kidiq)
+summary(mod1)
+```
+
+
+Este modelo resume la diferencia en los puntajes promedio de las pruebas entre los hijos de madres que completaron la escuela secundaria y aquellos con madres que no la completaron.
+
+Este coeficiente nos dice que los hijos de madres que han completado la escuela secundaria obtienen 12 puntos más en promedio que los hijos de madres que no han completado la escuela secundaria.
+
+
+Gráfico 3.1
+
+
+```{r}
+plot(mom_hs+runif(dim(kidiq)[1], min = -0.02, max=0.02), kid_score, pch=19, xlab= "Mother complete high school", ylab = "Child test score", xaxt="n")
+axis(1, c(0,1))
+
+abline(mod1, col="red", lty=2)
+```
+
+
+La puntuación de la prueba del niño se trazó frente a un indicador de si la madre completó la escuela secundaria. Se superpone la línea de regresión, que recorre el promedio de cada subpoblación definida por nivel de educación materna. La variable indicadora de finalización de la escuela secundaria se ha alterado; es decir, se ha agregado un número aleatorio a cada valor para que los puntos no se superpongan.
+
+
+
+Modelo 2: kid score vs mom iq
+
+
+```{r}
+mod2 <- lm(kid_score~mom_iq, data=kidiq)
+summary(mod2)
+```
+
+
+Si comparamos los puntajes promedio de las pruebas de los niños para las subpoblaciones que difieren en el CI materno en 1 punto, esperamos ver que el grupo con un CI materno más alto logre 0.6 puntos más en promedio. 
+
+Quizás una comparación más interesante sería entre grupos de niños cuyas madres tienen un coeficiente intelectual diferente en 10 puntos; se esperaría que estos niños tuvieran puntajes que difirieran en 6 puntos en promedio.
+
+
+Gráfica 3.2 
+
+
+```{r}
+plot(mom_iq, kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score")
+abline(mod2, col="red", lty=2)
+```
+
+
+La puntuación de la prueba del niño se trazó frente al coeficiente intelectual materno con la línea de regresión superpuesta. Cada punto de la línea se puede concebir como un puntaje de prueba infantil previsto para niños con madres que tienen el coeficiente intelectual correspondiente, o como el puntaje promedio para una subpoblación de niños con madres con ese coeficiente intelectual.
+
+
+Modelo 3: kid score vs mom hs + mom iq
+
+```{r}
+mod3 <- lm(kid_score ~ mom_hs+mom_iq, data=kidiq)
+summary(mod3)
+```
+
+
+Gráfica 3.3
+
+```{r}
+kidiq_hs_0 <- kidiq[kidiq$mom_hs==0,]
+kidiq_hs_1 <- kidiq[kidiq$mom_hs==1,]
+```
+
+
+```{r}
+plot(kidiq_hs_0$mom_iq,kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score")
+points(kidiq_hs_1$mom_iq,kidiq_hs_1$kid_score, pch=19, col="gray")
+abline(coef(mod3)[c(1,3)])
+abline(c(coef(mod3)[1]+coef(mod3)[2], coef(mod3)[3]), col="gray")
+```
+
+Figura 3.3 La puntuación de la prueba del niño graficada frente al coeficiente intelectual materno. Los puntos claros representan a los niños cuyas madres se graduaron de la escuela secundaria y los puntos oscuros representan a los niños cuyas madres no se graduaron de la escuela secundaria. Se superponen las líneas de regresión de la regresión de la puntuación de la prueba del niño sobre el coeficiente intelectual materno y el indicador de la escuela secundaria materna (la línea más oscura para los niños cuyas madres no completaron la escuela secundaria, la línea más clara para los niños cuyas madres completaron la escuela secundaria).
+
+
+
+4. Incluya una leyenda con legend() para mejorar la figura 3.3.
+
+```{r}
+plot(kidiq_hs_0$mom_iq,kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", ylim=c(10, 150), xlim=c(70, 140))
+points(kidiq_hs_1$mom_iq,kidiq_hs_1$kid_score, pch=19, col="gray")
+abline(coef(mod3)[c(1,3)])
+abline(c(coef(mod3)[1]+coef(mod3)[2], coef(mod3)[3]), col="gray")
+
+legend("topleft", legend=c("mom_hs=0", "mom_hs=1"),
+       col=c("black", "gray"), pch=19)
+```
+
+
+5. ¿Cuál de los tres modelos presenta mayor R^2?
+
+
+```{r}
+R2_mod1<-summary(mod1)$r.squared
+R2_mod2<-summary(mod2)$r.squared
+R2_mod3<-summary(mod3)$r.squared
+
+
+R2_mod1
+R2_mod2
+R2_mod3
+```
+
+El mayor R cuadrado se presenta en el modelo 3, que tiene los dos predictores, mom_hs y mom_iq
+
+
+
+6. Calcule la correlación entre la variable respuesta (y) y los valores estimados (y^), es decir, calcule cor(y,y^) para los tres modelos. ¿Cuál de los presenta la mayor correlación?
+
+
+```{r}
+y_gorro_mod1 <- mod1$fitted.values
+y_gorro_mod2 <- mod2$fitted.values
+y_gorro_mod3 <- mod3$fitted.values
+
+
+corr1 <- cor(kid_score, y_gorro_mod1)
+corr2 <- cor(kid_score, y_gorro_mod2)
+corr3 <- cor(kid_score, y_gorro_mod3)
+
+corr1
+corr2
+corr3
+```
+
+El modelo que presenta mayor correlación es el modelo 3.
+
+
+7. Observe la figura 3.4 del libro, ¿en qué se diferencia la figura 3.4(a) de la figura 3.4(b)? Rta: en nada, son la misma, why?
+
+
+
+```{r}
+mod4 <- lm(kid_score ~ mom_hs*mom_iq, data=kidiq)
+summary(mod4)
+```
+
+
+
+```{r}
+plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", xlim=c(73, 140))
+points(kidiq_hs_1$mom_iq, kidiq_hs_1$kid_score)
+abline(c(coef(mod4)[1], coef(mod4)[3]), lwd=2)
+abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))
+
+
+plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", xlim=c(0,150), ylim=c(-25,140))
+points(kidiq_hs_1$mom_iq, kidiq_hs_1$kid_score)
+abline(c(coef(mod4)[1], coef(mod4)[3]), lwd=2)
+abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))
+
+```
+
+
+Es la misma grafica pero cambia es el limite del ejes presentados, el de la primera figura es más reducido mientras que el de la segunda es más amplio, permitiendo observar mejor la intersección.
+
+
+Figura 3.4 (a) Líneas de regresión de la puntuación de la prueba del niño sobre el coeficiente intelectual de la madre con diferentes símbolos para los hijos de madres que completaron la escuela secundaria (círculos claros) y aquellos cuyas madres no completaron la escuela secundaria (puntos oscuros). La interacción permite una pendiente diferente en cada grupo, con líneas claras y oscuras correspondientes a los puntos claros y oscuros. (b) Misma gráfica pero con el eje horizontal extendido a cero para revelar las intersecciones de las líneas.
+
+
+
+8. Replique la figura 3.4 del libro pero incluya una leyenda con legend() para mejorarla.
+
+
+```{r}
+par(mfrow=c(1,2))
+plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", xlim=c(73, 140))
+points(kidiq_hs_1$mom_iq, kidiq_hs_1$kid_score)
+abline(c(coef(mod4)[1], coef(mod4)[3]), lwd=2)
+abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))
+legend("bottomright", legend=c("mom_hs=0", "mom_hs=1"), pch=c(19,1), bty="n")
+
+
+plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", xlim=c(0,150), ylim=c(-25,140))
+points(kidiq_hs_1$mom_iq, kidiq_hs_1$kid_score)
+abline(c(coef(mod4)[1], coef(mod4)[3]), lwd=2)
+abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))
+legend("bottomright", legend=c("mom_hs=0", "mom_hs=1"), pch=c(19,1), bty="n")
+```
+
+
+9. Incluya las ecuaciones de las rectas de la figura 3.4(b) en la misma figura, use la siguiente ayuda de stackoverflow https://stackoverflow.com/questions/17032300/add-an-equation-into-scatter-plots-in-r.
+
+
+```{r}
+plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab="Mother IQ score", ylab="Child test score", xlim=c(0,150), ylim=c(-25,140))
+points(kidiq_hs_1$mom_iq, kidiq_hs_1$kid_score)
+abline(c(coef(mod4)[1], coef(mod4)[3]), lwd=2)
+abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))
+legend(40,-10, paste("Linear model (mom_hs=0): Kid score = ", round(coef(mod4)[1],3), "+", round(coef(mod4)[3],3), "IQ mom"),  text.col= "black",cex=0.7,bty="n")
+legend(40,0, paste("Linear model (mom_hs=1): Kid score = ", round(coef(mod4)[1]+coef(mod4)[2],3), "+", round(coef(mod4)[3]+coef(mod4)[4],3), "IQ mom"),  text.col= "black",cex=0.7,bty="n")
+
+```
+
+10. Complete la tabla usando los modelos ajustados.
+
+
+```{r}
+Modelo <- c("fit.0", "fit.1", "fit.2", "fit.3")
+
+R2 <- c(summary(mod1)$r.squared, summary(mod2)$r.squared,
+        summary(mod3)$r.squared, summary(mod4)$r.squared)
+
+
+correlacion <- c(cor(kid_score, mod1$fitted.values),
+                 cor(kid_score, mod2$fitted.values), 
+                 cor(kid_score, mod3$fitted.values), 
+                 cor(kid_score, mod4$fitted.values))
+
+sigma_estimado <- c(summary(mod1)$sigma, summary(mod2)$sigma,
+                    summary(mod3)$sigma, summary(mod4)$sigma)
+
+
+tabla <- data.frame(Modelo, R2, correlacion, sigma_estimado)
+
+View(tabla)
+```
+
+
+Los mejores valores los tiene el modelo 4 que tiene la interacción.
+
+
+11. Ajuste el siguiente modelo y dibuje la superficie en 3d para representar el modelo ajustado.
+
+$$Kid Score_i \sim N(\beta_0 + \beta_1 momAge_i + \beta_2 momIq_i + \beta_3 momAge_i~momIq_i, \sigma^2)$$
+
+```{r}
+mod_final <- lm(kid_score~mom_age*mom_iq, data=kidiq)
+summary(mod_final)
+```
+
+
+
+```{r}
+library(scatterplot3d)
+
+# Se crea el grafico 3d y se guarda en un objeto, por ejemplo mi_3d
+mi_3d <- scatterplot3d(x=mom_age, y=mom_iq, z=mod_final$fitted.values, pch=16,
+                       cex.lab=1, highlight.3d=TRUE, type="h", xlab='Edad madre', ylab='IQ madre', zlab='Kid score')
+
+# Para agregar el plano usamos $plane3d( ) con argumento modelo ajustado
+#mi_3d$plane3d(mod_final, lty.box="solid", col='mediumblue')
+```
+
+
+
+
+
+
+
+
+

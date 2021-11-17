@@ -1,0 +1,5 @@
+"0","library(scatterplot3d)"
+"0",""
+"0","# Se crea el grafico 3d y se guarda en un objeto, por ejemplo mi_3d"
+"0","mi_3d <- scatterplot3d(x=mom_age, y=mom_iq, z=mod_final$fitted.values, pch=16,"
+"0","                       cex.lab=1, highlight.3d=TRUE, type=""h"", xlab='Edad madre', ylab='IQ madre', zlab='Kid score')"

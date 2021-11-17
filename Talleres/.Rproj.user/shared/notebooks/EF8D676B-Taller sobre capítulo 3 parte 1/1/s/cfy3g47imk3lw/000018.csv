@@ -1,0 +1,2 @@
+"0","legend(40,0, paste(""Linear model (mom_hs=1): Kid score = "", round(coef(mod4)[1]+coef(mod4)[2],3), ""+"", round(coef(mod4)[3]+coef(mod4)[4],3), ""IQ mom""),  text.col= ""black"",cex=0.7,bty=""n"")"
+"0",""

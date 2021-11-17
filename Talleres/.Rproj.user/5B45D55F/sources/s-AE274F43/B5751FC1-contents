@@ -1,0 +1,2343 @@
+---
+title: "Modelación del rendimiento académico de los estudiantes en la prueba saber ICFES"
+author: "Jennifer Salazar"
+date: ''
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+<div style="text-align: justify">
+
+```{r, echo = FALSE}
+#Importación de librerias
+library(kableExtra)
+library(dplyr)
+
+#Cargar datos iniciales 
+load("datos.RData")
+
+#Cargar datos con variables economicas
+load("datos_final.RData")
+
+# Cargar datos con las variables economicas más la variable resultado
+load("datos_completo.RData")
+```
+
+
+
+```{r, echo = FALSE}
+# Base de datos a utilizar para el trabajo final
+
+variables <- c("resultado", "ESTU_GENERO", "COLE_NATURALEZA", "economia", "grupo","COLE_INST_JORNADA", "COLE_CALENDARIO_COLEGIO", "ESTU_RESIDE_DEPT", "ESTU_DISC_SORDOCEGUERA", "ESTU_DISC_COGNITIVA", "ESTU_DISC_INVIDENTE", "ESTU_DISC_MOTRIZ", "ESTU_DISC_SORDOINTERPRETE", "ESTU_DISC_SORDONOINTERPRETE",     "ECON_SN_TELEFONIA", "ECON_SN_CELULAR", "ECON_SN_INTERNET", "ECON_SN_SERVICIO_TV", "ECON_SN_COMPUTADOR")
+
+Base_trabajo_final <- datos_completo[variables]
+
+colnames(Base_trabajo_final) <- c("resultado", "Genero", "Tipo_de_colegio",  "Economia_estudiante", "Economia_colegio","Jornada", "Calendario", "Departamento", "Disc_sordoceguera", "Disc_cognitiva", "Disc_invidente", "Disc_motriz", "Disc_sordointerprete", "Disc_sordonointerprete",  "Telefonia", "Celular", "Internet", "Televisión", "Computador" )
+
+## Organizando las variables 
+
+# Organizando la variable genero
+
+Base_trabajo_final$Genero <- as.character(Base_trabajo_final$Genero)
+
+Base_trabajo_final$Genero[Base_trabajo_final$Genero=="F"] <- "Femenino"
+Base_trabajo_final$Genero[Base_trabajo_final$Genero=="M"] <- "Masculino"
+Base_trabajo_final$Genero[Base_trabajo_final$Genero==""] <- "Indefinido"
+
+Base_trabajo_final$Genero <- as.factor(Base_trabajo_final$Genero)
+
+
+
+# Organizando las variables de discapacidades
+
+Base_trabajo_final$Disc_sordoceguera <- as.character(Base_trabajo_final$Disc_sordoceguera)
+Base_trabajo_final$Disc_cognitiva <- as.character(Base_trabajo_final$Disc_cognitiva)
+Base_trabajo_final$Disc_invidente <- as.character(Base_trabajo_final$Disc_invidente)
+Base_trabajo_final$Disc_motriz <- as.character(Base_trabajo_final$Disc_motriz)
+Base_trabajo_final$Disc_sordointerprete <- as.character(Base_trabajo_final$Disc_sordointerprete)
+Base_trabajo_final$Disc_sordonointerprete <- as.character(Base_trabajo_final$Disc_sordonointerprete)
+
+# Sordoceguera
+Base_trabajo_final$Disc_sordoceguera[Base_trabajo_final$Disc_sordoceguera==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_sordoceguera[Base_trabajo_final$Disc_sordoceguera=="C"] <- "Con discapacidad"
+
+#Cognitiva
+Base_trabajo_final$Disc_cognitiva[Base_trabajo_final$Disc_cognitiva==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_cognitiva[Base_trabajo_final$Disc_cognitiva=="G"] <- "Con discapacidad"
+
+
+#Invidente
+Base_trabajo_final$Disc_invidente[Base_trabajo_final$Disc_invidente==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_invidente[Base_trabajo_final$Disc_invidente=="I"] <- "Con discapacidad"
+
+#Motriz
+Base_trabajo_final$Disc_motriz[Base_trabajo_final$Disc_motriz==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_motriz[Base_trabajo_final$Disc_motriz=="M"] <- "Con discapacidad"
+
+
+#Sordo interprete
+Base_trabajo_final$Disc_sordointerprete[Base_trabajo_final$Disc_sordointerprete==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_sordointerprete[Base_trabajo_final$Disc_sordointerprete=="R"] <- "Con discapacidad"
+
+#Sordo no interprete
+Base_trabajo_final$Disc_sordonointerprete[Base_trabajo_final$Disc_sordonointerprete==""] <- "Sin discapacidad"
+Base_trabajo_final$Disc_sordonointerprete[Base_trabajo_final$Disc_sordonointerprete=="S"] <- "Con discapacidad"
+
+
+Base_trabajo_final$Disc_sordoceguera <- as.factor(Base_trabajo_final$Disc_sordoceguera)
+Base_trabajo_final$Disc_cognitiva <- as.factor(Base_trabajo_final$Disc_cognitiva)
+Base_trabajo_final$Disc_invidente <- as.factor(Base_trabajo_final$Disc_invidente)
+Base_trabajo_final$Disc_motriz <- as.factor(Base_trabajo_final$Disc_motriz)
+Base_trabajo_final$Disc_sordointerprete <- as.factor(Base_trabajo_final$Disc_sordointerprete)
+Base_trabajo_final$Disc_sordonointerprete <- as.factor(Base_trabajo_final$Disc_sordonointerprete)
+
+# Organizando la variable tipo de colegio
+
+Base_trabajo_final$Tipo_de_colegio<- as.character(Base_trabajo_final$Tipo_de_colegio)
+
+Base_trabajo_final$Tipo_de_colegio[Base_trabajo_final$Tipo_de_colegio=="O"] <- "Oficial"
+Base_trabajo_final$Tipo_de_colegio[Base_trabajo_final$Tipo_de_colegio=="N"] <- "No oficial"
+
+Base_trabajo_final$Tipo_de_colegio <- as.factor(Base_trabajo_final$Tipo_de_colegio)
+
+
+# Organizando Niveles de la variable Jornada
+
+levels(Base_trabajo_final$Jornada) <- c("COMPLETA U ORDINARIA", "MAÑANA", "NOCHE", "SABATINA - DOMINICAL","TARDE" )
+
+# Organizando la variables de tecnologias
+
+# Telefonia
+Base_trabajo_final$Telefonia[Base_trabajo_final$Telefonia==0] <- "No tiene"
+Base_trabajo_final$Telefonia[Base_trabajo_final$Telefonia==1] <- "Si tiene"
+
+# Celular
+Base_trabajo_final$Celular[Base_trabajo_final$Celular==0] <- "No tiene"
+Base_trabajo_final$Celular[Base_trabajo_final$Celular==1] <- "Si tiene"
+
+# Internet
+Base_trabajo_final$Internet[Base_trabajo_final$Internet==0] <- "No tiene"
+Base_trabajo_final$Internet[Base_trabajo_final$Internet==1] <- "Si tiene"
+
+# Televisión
+Base_trabajo_final$Televisión[Base_trabajo_final$Televisión==0] <- "No tiene"
+Base_trabajo_final$Televisión[Base_trabajo_final$Televisión==1] <- "Si tiene"
+
+# Computador
+Base_trabajo_final$Computador[Base_trabajo_final$Computador==0] <- "No tiene"
+Base_trabajo_final$Computador[Base_trabajo_final$Computador==1] <- "Si tiene"
+Base_trabajo_final$Computador[Base_trabajo_final$Computador==3] <- "Indefinido"
+
+
+# Conversión de variables numericas a factor
+
+Base_trabajo_final <- Base_trabajo_final %>% 
+  mutate(
+    Telefonia = factor(Telefonia),
+    Celular = factor(Celular),           
+    Internet = factor(Internet),            
+    Televisión = factor(Televisión),         
+    Computador = factor(Computador) 
+    
+    
+  )
+
+```
+
+
+
+<h2> <center> Introducción </h2> </center>
+
+El rendimiento academico a traves de las últimas decadas en el pais de Colombia ha sido estudiado a partir de los resultados obtenidos en las pruebas saber ICFES, la cual ha alcanzado una gran acogida y ha sido determinante para muchos procesos incluyendo la formación de educación superior, pero más allá de analizar los resultados o puestos ocupados por los estudiantes en estas pruebas, los cuales hasta el momento han sido el enfoque principal, se quiere estudiar cuales son aquellos factores que intervienen o tienen alta influncia en los resultados obtenidos por el estudiante, porque es evidente que todos los estudiantes no estan bajo las mismas condiciones o bajo el mismo estilo de vida, por lo tanto mediante este documento se realiza un análisis detallado de aquellas variables que tienen alta influencia sobre los resultados en las pruebas saber ICFES, lo cual se va a realizar mediante modelación, con el fin de saber que condiciones o propiedad normalmente tienen los estudiantes que tiende a tener muy buenos resultados en la prueba saber ICFES y los que tienen resultados no tan favorables, todo esto con el proposito de dar a conocer cuales aspectos de la vida de los estudiantes se les tiene que dar importancia respecto a la formación académica que estos adquieren a través de los años.
+
+
+
+<br>
+
+<h2> <center> Marco teórico </h2> </center>
+
+El problema bajo estudio es de tipo observacional cuya variable respuesta es en resultado obtenido en las pruebas saber ICFES.
+
+Este estudio pretende realizar un análisis de aquellas variables que tienen una alta influencia en los resultados que los estudiantes obtienen en las pruebas saber ICFES, el cual se realiza mediante modelación, basadas principalmente en regresión logistica y regresión logistica multinomial, adaptadas para variables categoricas, es decir que puedan ser utilizadas principalmente para la modelación de tablas de contingencia, todo esto con el fin de poder realizar hipotesis de cual es la relación de cada una de las variables con los resultados que obtienen los estudiantes y poder comprobar mediante la modelación si estas son correctas y a partir de allí sacar conclusiones de intéres.
+
+La idea tras este estudio es realizar el planteamiento de posibles hipotesis que se tengan de los datos y de las relaciones que intiutivamente pueden darse entre las covariables(caracteristicas de los estudiantes) y la variable respuesta (Resultado) con el fin de ser traducidas a modelos que seran estimados y cuyo resultados serán analizados para dar validez de que las ideas previamente planteadas de verdad son coherentes con los datos.
+
+
+
+Todo el análisis a realizar será basado en toda la información recopilada mediante la realización de las pruebas saber ICFES del periodo académico 2013-2, para obtener más información visitar las siguientes páginas...
+
+* https://www.icfes.gov.co/investigadores-y-estudiantes-posgrado/acceso-a-bases-de-datos
+* https://www.icfes.gov.co/documents/20143/1885630/4.+Diccionario+Saber11+2010-1+a+2014-1.pdf
+
+
+<br>
+
+
+<h2> <center> Conjunto de datos a utilizar </h2> </center>
+
+
+
+Para realizar todo el análisis se cuenta con un conjunto de datos que contiene a todos los estudiantes que presentaron la prueba saber ICFES en el periodo acádemico 2013-2, a partir de esta se permitira poder obtener conclusiones del problema de estudio planteado.
+
+
+```{r, echo=FALSE}
+
+kable(head(Base_trabajo_final[1:8]), caption = "Visualización de una parte del Conjunto de datos")%>%
+  kable_paper("striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+kable(head(Base_trabajo_final[9:14]))%>%
+  kable_paper("striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+kable(head(Base_trabajo_final[15:19]))%>%
+  kable_paper("striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+<br>
+
+
+<h2> <center> Contextualización de todas las variables a utilizar </h2> </center>
+
+<h2> Variable respuesta </h2>
+
+
+**Resultado**
+
+Esta variable esta directamente relacionada con los puestos que ocuparon cada uno de los estudiantes en la prueba saber ICFES, que van del 1 al 1000, los cuales cada uno de los puestos pueden ser ocupados por muchos estudiantes.
+
+**Métodología de asignación de puestos:** _Para el cálculo del puesto se divide la población evaluada en una determinada aplicación entre 1.000, mediante este se genera el número de grupos, el cual cada uno esta conformado por 1.000 estudiantes, con lo cuál a cada uno se le asigna un puesto del 1 al 1.000 basado solamente en el grupo al cual pertenece, de tal manera que en cada grupo cada estudiante tiene un puesto diferente al de los demás de su mismo grupo pero tiene el mismo de otros estudiantes en otros grupos, mediante esta metodologia se consigue que haya la misma cantidad de estudiantes que ocupan cada uno de los puestos y que todos los puestos sean ocupados por muchos estudiantes)._
+
+Todo lo anterior describe la metodologia de creación de la variable por parte del ICFES, pero para nuestro análisis se creará una nueva variable la cual tiene el nombre de **resultado** y se presenta a continuación:
+
+La idea que sale a partir de la variable del puesto ocupado por cada estudiante, es hacer una conversión a una variable cualtativa de tal manera que se contemplen 10 categorias las cuales serán.
+
+
+```{r, echo=FALSE}
+nivel <- 1:10
+puesto_inf <- seq(1, 900, 100)
+puesto_sup <- seq(100, 1000, 100)
+Niveles <- paste("Nivel", nivel, ":")
+Puestos <- paste("Estudiantes que ocupan puestos del", puesto_inf, "al", puesto_sup)
+df <- data.frame(Niveles, Puestos)
+
+
+kable(df,  
+      caption = "Asignación de los niveles según el puesto ocupado en la prueba saber
+      ICFES") %>%
+  kable_paper("hover", full_width = F) %>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+
+```
+
+
+
+Mediante esta nueva variable categorica llamada resultado, que tiene 10 niveles en los cuales el nivel 1 hace referencia a los estudiantes que obtuvieron los mejores resultados en la prueba saber ICFES y el nivel 10 hace referencia a los estudiante que obtuvieron lo resultados más desfavorables en la prueba saber ICFES.
+
+El número de estudiantes que hay en cada una de las categorias de la variable **Resultado** son:
+
+```{r, echo=FALSE}
+kable(table(datos_completo$resultado), col.names = c("Resultado", "No. Estudiantes"))%>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+
+
+
+* En el conjunto de datos completo de las pruebas saber ICFES, es decir, teniendo en cuenta a todos los estudiantes en Colombia la cantidad de estudiantes en cada una de las categorias de la variable **Resultado** son casi las mismos, debido a la metodologia de asignación de puestos mencionada previamente.
+
+<br>
+
+
+<h2> Variables explicativas </h2>
+
+<h3> <center> Variable explicativa </h3> </center>
+
+
+**Genero**
+
+Es una variable que indica el genero del estudiante, es una variable categórica con los siguientes dos niveles:
+
+
+* Femenino
+* Masculino
+* Indefinido
+
+**El número de estudiantes que pertenecen a cada uno de los niveles de la variable Genero se presenta a continuación:**
+
+
+```{r, echo=FALSE}
+Base_trabajo_final$Genero <- factor(Base_trabajo_final$Genero, levels = levels(Base_trabajo_final$Genero)[ c( 1,3,2 ) ] )
+
+kable(table(Base_trabajo_final$Genero), col.names = c("Genero", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+```{r, echo=FALSE, fig.align="center"}
+plot(Base_trabajo_final$Genero, col="cyan4", ylab="No. Estudiantes", xlab="Genero", main="Número de estudiantes que pertenecen a cada Genero")
+grid()
+```
+
+* Se cuenta con 300260 estudiantes del género femenino y 246985 estudiantes del género masculino, además de 40 estudiantes que no definieron su género, esto puede deberse a culturas y gustos en donde el estudiante prefiere omitir este tipo de información lo cual debe ser totalmente aceptable.
+
+
+<br>
+
+
+
+<h3> <center> Variable explicativa </h3> </center>
+
+**Tipo de colegio**
+
+Esta variable ya viene mediante las bases de datos del ICFES como una variable cualitativa, la cual cuenta con dos niveles:
+
+* N: "No Oficiales"
+* O: "Oficiales"
+
+Es una variable que Indica la naturaleza del establecimiento al cual pertenece cada uno de los estudiantes.
+
+En Colombia se les llama colegios oficiales o colegios públicos a los colegios del gobierno o del Estado colombiano. A Los que no son del gobierno y pertenecen a particulares se les llama colegios privados o colegios no oficiales.
+
+Para obtener más información acerca de los colegios oficiales y no oficiales consultar el siguiente enlace con información por parte ministerio de educación.   
+
+[Colegios Oficiales y no oficiales reglamentos](https://www.mineducacion.gov.co/1759/w3-article-379329.html?_noredirect=1)
+
+Por tanto a esta variable no se le realizaron modificaciones.
+
+
+**El número de estudiantes que pertenecen a colegios oficiales y no oficiales se presenta a continuación:**
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Tipo_de_colegio), col.names = c("Tipo de Colegio", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+```{r, echo=FALSE, fig.align="center"}
+plot(Base_trabajo_final$Tipo_de_colegio, col="cyan4", ylab="No. Estudiantes", xlab="Tipo de Colegio", main="Número de estudiantes en colegios oficiales y no oficiales")
+grid()
+```
+
+* Hay más colegios oficiales (es decir colegios públicos), siendo más del triple, con más puntualidad por cada estudiante de colegio no oficial hay 3.06 que es aproximadamente 3 estudiantes de colegios oficiales y llevandolo a escalas más grandes, por cada 100 estudiantes de colegios no oficiales hay 306 estudiantes de colegios oficiales.
+
+<br>
+
+<h3> <center> Variables explicativas </h3> </center>
+
+**Economia del colegio y Economia del estudiante**
+
+
+
+La variable categorica **Economia del colegio** creada a partir de otras variables presentes en el conjunto de datos de la prueba saber ICFES, realmente es una variable que paso por varios procesos para ser calculada y se presentan a continuación:
+
+
+A cada uno de los estudiantes que presentaron la prueba saber ICFES se le asignó un índice que indica la economía del mismo, que es la llamada **Economia del estudiante** el cual tiene niveles del 1 al 10, donde 1 son los estudiantes más pobres y 10 son los estudiantes más ricos, esto fue asignado mediante el análisis de variables socieconomicas asociadas a cada estudiante (Estrato, ingresos familiares, caracteristicas del hogar, etc). 
+
+Posteriormente a cada colegio se le hayo un índice en base al promedio del índice de economía de todos los estudiantes que pertenecen a dicho colegio.
+
+Luego de que cada colegio tuviera su respectivo índice, se realizó un análisis mediante deciles, para saber cuáles eran el 10% de los colegios más pobres, los siguientes 10% con la economía que seguía, así sucesivamente hasta llegar al 10% de los colegios más ricos, es decir se crearon 10 categorías o grupos en donde en cada una se tenía los colegios según su economía, donde el grupo 1 pertenecían el 10% de los colegios más pobres y el grupo 10 pertenecían el 10% de los colegios más ricos.
+
+
+Después de realizar todo esto, se creó una nueva variable que es la llamada **Economia del colegio** la cual es asignada a cada uno de los estudiantes, que corresponde al índice en el cual quedo categorizado o agrupado el colegio en el cual pertenece, es decir, por ejemplo, si el colegio del estudiante quedo en el grupo 1(10% de los colegios más pobres) a el estudiante se le asigna el índice 1 que indica que pertenece al grupo 1 en la riqueza del establecimiento, es decir al grupo de los colegios más pobres.
+
+Por lo tanto, cada estudiante finalmente queda con un índice de su propia economía y con otro que indica la economía del establecimiento o colegio al cual pertenece.
+
+**Se analiza a continuación el número de estudiantes  que pertenecen a cada una de las categorias de las variables Economia del estudiante y Economia del colegio**
+
+<h4> <center> Economia del estudiante </center> </h4>
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Economia_estudiante), col.names = c("Economia del estudiante", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+
+* La mayor cantidad de estudiantes se acumulan en los primero niveles de la variable, es decir, tienden a tener niveles de economia no tan altos.
+
+<hr>
+
+<h4> <center> Economia del estudiante </center> </h4>
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Economia_colegio), col.names = c("Economia del colegio", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+* Por la forma en que se creo la variable, se espera un número similar de estudiantes en cada uno de los niveles, dado que son deciles, la diferencia radica es en la cantidad de estudiantes que tengan los colegios que pertenezcan a un determinado nivel de economia, como por ejemplo los colegios que tienen un nivel de economia de 7, tienden a tener mayor número de estudiantes (Colegios más grandes) dado que es el nivel con mayor número de estudiantes presentes.
+
+```{r, echo=FALSE, fig.align="center"}
+
+par(mfrow=c(1,2))
+plot(Base_trabajo_final$Economia_estudiante, col="cyan4", ylab="No. Estudiantes", xlab="Nivel de economia del estudiante", main="Número de estudiantes según su propia economia", cex.main=0.7, las = 2)
+grid()
+
+plot(Base_trabajo_final$Economia_colegio, col="cyan4", ylab="No. Estudiantes", xlab="Nivel de economia del colegio", main="Número de estudiantes según la Economia de su colegio", cex.main=0.7, las=2)
+grid()
+```
+
+
+* Para la gráfica asociada a la economia del estudiante se percibe que la mayor cantidad de estudiantes tienen un nivel de economia entre 3 y 5, es decir niveles de economia que no son tan altos.
+
+* A pesar de que la variable **Economia del colegio** fue creada a partir de la variable **Economia del estudiante** esta tiende a distribuir de manera más uniforme los niveles y esto se debe a su estrategia de creación ya que fue a partir de deciles, por lo tanto inicialmente en todos los niveles (1 al 10) habia el mismo número de colegios, pero dado que en la gráfica se presentada es el número de estudiantes, es claro que no todos los colegios disponen de la misma cantidad de estudiantes y por ello son las diferencia en las cantidades, indicando que colegios con diferentes economias tienen a tener número de estudiantes muy diferentes, por ejemplo los colegios con niveles de economia 7, son los que tienen mayor número de estudiantes y colegios con niveles de economia 1 son los que tienen menor número de estudiantes. 
+
+<br>
+
+<h3> <center> Variable explicativa </h3> </center>
+
+**Jornada**
+
+Todos los colegios a nivel de Colombia no presentan las mismas jornadas de estudio y esto da pie a brindar a la población muchas oportunidades para estudiar y no limitarse por la disponibilidad de horas en el dia que tiene tiempo para disponer de este recurso, esta variable indica las jornadas que disponen los colegios del pais, cabe aclarar que unas son más comunes que otras y unas abarcan mayor número de estudiantes que otras, se presentan a continuación las jornadas que se tiene la oportunidad vincularse:
+
+
+
+* Jornada MAÑANA: Esta jornada se caracteriza por presentarse en las horas de la mañana, que es aproximadamente entre 6 AM y 12 M.
+
+* Jornada TARDE: Esta jornada se caracteriza por presentarse en las horas de la tarde, que es aproximadamente entre 12 M y 6 PM.
+
+* Jornada NOCHE: Esta jornada se caracteriza por presentarse en las horas de la noche, que es aproximadamente entre 6 PM y 10 PM.
+
+* Jornada SABATINA - DOMINICAL: Se caracteriza por ser brindada los fines de semana (dias sábaso y domingos).
+
+* Jornada COMPLETA U ORDINARIA: es el tiempo diario que dedica el establecimiento educativo a sus estudiantes en la prestación directa del servicio educativo, la cual es la más extensa, puede abarcar a las demás jornadas.
+
+
+
+**En este análisis se va a presentar el número de estudiantes que participa de cada una de las jornadas**
+
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Jornada), col.names = c("Jornada", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+```{r, echo=FALSE, fig.align="center"}
+
+Jornada_aux <- Base_trabajo_final$Jornada
+
+levels(Jornada_aux) <- c("COMPLETA", "MAÑANA", "NOCHE", "SAB-DOM", "TARDE")
+
+plot(Jornada_aux, col="cyan4", ylab="No. Estudiantes", xlab="Jornadas", main="Número de estudiantes según la Jornada de estudio")
+grid()
+```
+
+* Las jornadas de la mañana y la completa u ordinaria son las más comunes y siendo las menos comunes las de la noche y sabatica dominical.
+
+* Lo anterior puede deberse a que como son horarios escolares y la mayor población son estudiantes menores de edad, se esperaria que participaran de jornadas más seguras como los son las jornadas de la mañana, completa u ordina y tarde, ya que la noche puede ser más insegura y esta diseñada para personas que trabajan al igual que las sabaticas y dominicales que esta diseñadas para personas que en los dias de la semana no tienen disponibilidad y esto principalmente se debe a responsabilidades como trabajar y es claro que la mayor proporción de estudiantes no tienen esta situación.
+
+
+<br>
+
+<h3> <center> Variable explicativa </h3> </center>
+
+**Calendario**
+
+
+Es una variable que indica el Calendario académico del establecimiento al cual pertenece el estudiante, es una variable categórica con los siguientes dos niveles:
+
+* A: A
+* B: B
+* OTRO: F
+
+
+<center>
+![](Calendario.png){width=35% height=25%}
+</center>
+
+
+**El número de estudiantes según los respectivos calendarios académicos se presenta a continuación:**
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Calendario), col.names = c("Calendario", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+
+
+
+```{r, echo=FALSE, fig.align="center"}
+plot(Base_trabajo_final$Calendario, col="cyan4", ylab="No. Estudiantes", xlab="Tipo de Colegio", main="Número de estudiantes en colegios oficiales y no oficiales")
+grid()
+```
+
+
+* Se cuenta con 460384 estudiantes donde el calendario académico es de tipo A, 2050 estudiante donde el calendario académico es de tipo B y 84851 estudiantes que tiene un calendario académico diferente a los dos anteriores.
+
+* El calendario académico más común en el pais de Colombia es el **A**.
+
+
+<br>
+
+<h3> <center> Variable explicativa </h3> </center>
+
+**Departamento**
+
+Esta variable indica el nombre del departamento de Colombia al cual pertenece el estudiante el cual dispone de 34 niveles:
+
+```{r, echo = FALSE}
+levels(Base_trabajo_final$Departamento) <- c("INDEFINIDO","AMAZONAS","ANTIOQUIA","ARAUCA","ATLANTICO","BOGOTA","BOLIVAR","BOYACA","CORDOBA","CALDAS","CAQUETA","CASANARE","CAUCA","CESAR","CHOCO","CUNDINAMARCA","GUAINIA","GUAVIARE","HUILA","LA GUAJIRA","MAGDALENA","META","NARIÑO","NORTE DE SANTANDER","PUTUMAYO","QUINDIO","RISARALDA","SAN ANDRES","SANTANDER","SUCRE","TOLIMA","VALLE","VAUPES","VICHADA")
+```
+
+
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Departamento), col.names = c("Departamento", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+```{r, echo=FALSE, fig.align="center"}
+plot(Base_trabajo_final$Departamento, col="cyan4", ylab="No. Estudiantes", main="Número de estudiantes según el departamento", las=2, cex.axis=0.8, cex=0.7)
+grid()
+```
+
+
+* El mayor número de estudiantes pertenecen a los departamentos de Bogotá y de Antioquia.
+
+<br>
+
+
+<h3> <center> Variables explicativas </h3> </center>
+
+**Discapacidades**
+
+_A continuación se presetan las variables categoricas que indican discapacidades de las cuales pueden o no padecer cada uno de los estudiantes:_
+
+
+* **Disc_sordoceguera:** Indica si el estudiante padece de discapacidad de sordera y ceguera
+
+Se habla que una persona padece de esta discapacidad cuando tiene dificultades para escuchar y para ver, estas pueden ser de grados leves (parciales) o severas, que es cuando el estudiante pierde las dos por completo, el cual es una de las que genera mayor dificultad para que el estudiante se desempeñe bien académicamente por lo tanto necesita métodos de evaluación especiales.
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_sordoceguera), col.names = c("Sordo ceguera", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+
+
+<br>
+
+* **Disc_cognitiva:** Indica si el estudiante padece de  discapacidad de cognitiva.
+
+Se habla de discapacidad cognitiva cuando el alumno muestra serias limitaciones o retraso en sus capacidades intelectuales y en la ejecución de conductas adaptativas al entorno que le rodea. Estas deficiencias cognitivas, a su vez, dificultan seriamente el aprendizaje de competencias y, por tanto, el desarrollo integral del estudiante.
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_cognitiva), col.names = c("Cognitiva", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+ 
+<br>
+
+* **Disc_invidente:** Indica si el estudiante padece de  discapacidad de ser invidente.
+
+La noción de invidente se emplea para aludir a la persona que no puede hacer uso del sentido de la vista. Alguien invidente, por lo tanto, es ciego: no está en condiciones de ver.
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_invidente), col.names = c("Invidente", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+* **Disc_motriz:** Indica si el estudiante padece de  discapacidad de motricidad
+
+Ocurre cuando hay alteración en músculos, huesos o articulaciones, o bien cuando hay daño en el cerebro que afecta el área motriz y que le impide a la persona moverse de forma adecuada o realizar movimientos finos con precisión.
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_motriz), col.names = c("Motriz", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+ 
+<br>
+
+* **Disc_sordointerprete:** Indica si el estudiante padece de discapacidad de ser sordo interprete.
+
+Un sordo interprete es una persona sorda con la capacidad de comunicación la cual tiene dificultades para oír. Puede ser que oiga un poquito o puede que no oiga ningún sonido. Las personas sordas tienen las mismas capacidades que los oyentes y al ser estas interpretes hace referencia a que se pueden comunicar, más comúnmente mediante el lenguaje de señas.
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_sordointerprete), col.names = c("Sordo interprete", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+* **Disc_sordonointerprete:** Indica si el estudiante padece de discapacidad de ser sordo y no interprete
+
+Un sordo no interprete es una persona sorda sin la capacidad de comunicación la cual tiene dificultades para oír. Puede ser que oiga un poquito o puede que no oiga ningún sonido. Las personas sordas tienen las mismas capacidades que los oyentes pero  al ser estas no interpretes tiene muchas dificultades para comunicarse pueden comunicar lo que indica que su proceso de aprendizaje es muy diferente y más lento.
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Disc_sordonointerprete), col.names = c("Sordo no interprete", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+
+<br>
+
+
+<h3> <center> Variables explicativas </h3> </center>
+
+**Aparatos tecnologicos**
+
+Las variables categoricas que se presentan a continuación son objetos tecnologicos o servicios de los cuales puede hacer uso el estudiante en su formación académica y en los cuales en cada una de las variables se indica si el estudiante los posee o no.
+
+
+- **Telefonia:** Es una variable que indica si el estudiante cuenta con telefono fijo 
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Telefonia), col.names = c("Telefonia", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+- **Celular:** Es una variable que indica si el estudiante cuenta con telefono móvil
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Celular), col.names = c("Celular", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+- **Internet:** Es una variable que indica si el hogar del estudiante cuenta con servicio o conexión a internet.
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Internet), col.names = c("Internet", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+
+- **Televisión:**  Es una variable que indica si el hogar del estudiante cuenta con servicio de televisión  
+
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Televisión), col.names = c("Televisión", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+
+- **Computador** Es una variable que indica si el hogar del estudiante cuenta con computador (portatil o de mesa).
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final$Computador), col.names = c("Computador", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+<br>
+<hr>
+
+<h1> <center> Modelación </center> </h1>
+
+
+<h2> <center> Modelo de regresión logistica binaria </center> </h2>
+
+La Regresión Logística Binaria (RLB) se usa cuando se desea conocer la relación entre una variable dependiente cualitativa dicotómica (dependencia) y una o más variables independientes o explicativas, que pueden ser cualitativas y/o cuantitativas(en este estudio particular todas las variables independientes son cualitativas) con el objetivo de obtener una estimación.
+
+Para este caso, dado que la variable respuesta **Resultado** es una variable categorica con 10 niveles y se quiere realizar un modelo de regresión logistica binaria, se debe de recategorizar esta variable para tener dos niveles.
+
+Se presenta a continuación la nueva variable  **Resultado** a considerar:
+
+
+### Variable respuesta como variable binaria
+
+Conjunto de datos transformando la variable **Resultado** a binaria:
+
+
+
+Para el ajuste de los modelos se crea una variable binaria (1:Bien, 0:mal), la cual indica 1 si el estudiantes obtiene muy buenos resultados en la prueba, el cual se considera como los puestos del 1 al 500 (niveles 1 a 5 variable resultado) y a partir de 501 en adelante se consideran que no son resultados tan satisfactorias por lo tanto se consideraran como un 0 que signfica que al estudiante no le fue tan bien en la prueba, es decir los puestos del 501 al 1000 (niveles 6 a 10 variable resultado).
+
+
+```{r, echo = FALSE}
+Base_trabajo_final_binaria <- Base_trabajo_final
+levels(Base_trabajo_final_binaria$resultado) <- 1:10
+Base_trabajo_final_binaria$resultado <- as.numeric(Base_trabajo_final_binaria$resultado)
+
+
+Base_trabajo_final_binaria$resultado[Base_trabajo_final_binaria$resultado %in% 1:5] <- "Bueno"
+Base_trabajo_final_binaria$resultado[Base_trabajo_final_binaria$resultado %in% 6:10] <- "Malo"
+
+Base_trabajo_final_binaria$resultado <- as.factor(Base_trabajo_final_binaria$resultado)
+```
+
+
+
+```{r, echo = FALSE}
+kable(head(Base_trabajo_final_binaria[,1:8]), caption = "Resultados prueba de homogeneidad")%>%
+  kable_paper("striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white") %>%
+  column_spec(1, color = "white", background = "#63BCCF" )
+```
+
+
+```{r, echo=FALSE}
+kable(table(Base_trabajo_final_binaria$resultado), col.names = c("Resultado", "No. Estudiantes")) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+```{r, echo=FALSE, fig.align="center"}
+barplot(table(Base_trabajo_final_binaria$resultado), col="cyan4")
+grid()
+```
+
+* Hay un número muy similar de estudiantes cuyos resultados fueron  buenos y malos en las pruebas saber ICFES es decir, los niveles estan balanceados.
+
+
+<hr>
+
+```{r, echo=FALSE}
+# N: Tabla de frecuencias
+# Nro.Estratos: Numero de subpoblaciones
+# A: Matriz que determina las relaciones entre
+# las probabilidades f=Ap
+# Puede entrarse la matriz A completa o
+# las relaciones que se dan en cada subpoblacion,
+# en este caso se entra una sola fila.
+# X: Matriz de diseño f=Xb+e
+# Si logaritmo=T, toma el log de las probabilidades
+GSK<-function(N,Nro.Estratos,A, logaritmo=F, X=NULL){
+  A<-generaA(A,N)
+  N<-matrix(t(N),ncol=1,byrow=F)
+  N<-ceros.a.5(N)
+  Nro.respuestas<-length(N)/Nro.Estratos
+  #A<-generaA(A)
+  donde.voy<-0
+  for(i in 1:Nro.Estratos){
+    print('================================================')
+    identifica<-c('Estrato ',i)
+    print(identifica)
+    temp<-N[(donde.voy+1):(donde.voy+Nro.respuestas)]
+    print('Frecuencias de la subpoblacion')
+    print(temp)
+    donde.voy<-donde.voy+Nro.respuestas
+    n.temp<-sum(temp)
+    probab<-matrix(temp/n.temp,ncol=1)
+    temp<- probab%*%t(probab)
+    temp2<-diag(as.vector(probab))
+    varcov.p<-(temp2-temp)/n.temp
+    print('p estimado del estrato')
+    print(t(probab))
+    print('Matriz de varianzas y covarianzas estimada del estrato')
+    print(varcov.p)
+    if(i==1){
+      varcov.grande<-varcov.p
+      prob.grande<-probab
+    }
+    else{
+      varcov.grande<-crea.bloque(varcov.grande,varcov.p)
+      prob.grande<-rbind(prob.grande,probab)
+    }
+  }
+  print('================================================')
+  if(logaritmo==T){
+    D<-diag(as.vector(1/prob.grande))
+    varcov.grande<-D%*%varcov.grande%*%D
+    prob.grande<-log(prob.grande)
+    print('Logaritmo del vector de probabilidades completo')
+    print(prob.grande)
+    print('Matriz de covarianzas del log de las prob. estimadas')
+    print(varcov.grande)
+  }
+  print('================================================')
+  f=A%*%matrix(prob.grande,ncol=1)
+  varcov.f<-A%*%varcov.grande%*%t(A)
+  print('f estimado ')
+  print(f)
+  print('Matriz de varianzas y covarianzas de f')
+  print(varcov.f)
+  if(is.null(X)==T){
+    B=cbind(1,diag(-1,nrow=(length(f)-1)))
+    Bf=B%*%f
+    chi=t(Bf)%*%solve(B%*%varcov.f%*%t(B))%*%Bf
+    gl=nrow(B)
+    valor.p=pchisq(chi,gl,lower.tail=F)
+    print('Prueba de igualdad de las f')
+    print(c('Chicuadrada calculada: ',chi))
+    print(c('Valor-p: ',valor.p))
+  }
+  if(is.null(X)==F){
+    print('********** Estimacion del modelo *****************')
+    temp<-t(X)%*%solve(varcov.f)
+    varcov.b<-solve(temp%*%X)
+    beta<-varcov.b%*%temp%*%f
+    valores.z<-beta/sqrt(diag(varcov.b))
+    print('beta estimado y matriz de varianzas y covarianzas')
+    print(beta)
+    print('valores del la z calculada')
+    print(valores.z)
+    print('Matriz de varianzas y covarianzas de beta')
+    print(varcov.b)
+    print('*********************************************')
+    print('Prueba Ho:b1=b2=...=bk=0') # Se asume intercepto
+    valor.chi<-t(beta[-1])%*%solve(varcov.b[-1,-1])%*%beta[-1]
+    print(c('Chicuadrardo calculado: ',valor.chi))
+    gl=nrow(varcov.b)-1
+    valor.p=pchisq(valor.chi,gl,lower.tail=F)
+    print(c('Valor-p: ',valor.p))
+    print('*********************************************')
+    f.gorro<-X%*%beta
+    varcov.fg<-X%*%varcov.b%*%t(X)
+    print('Matriz de varianzas y covarianzas de la f predicha')
+    print(varcov.fg)
+    error.fg<-sqrt(diag(varcov.fg))
+    print('f predicha')
+    print(f.gorro)
+    print('Errores estandares de la f.predicha')
+    print(error.fg)
+    print('********* Residuales **********')
+    residuales<-f-f.gorro
+    print('Residuales=f.estimada-f.predicha')
+    print(residuales)
+    res.est<-residuales/error.fg
+    print('Residuales estandarizados')
+    print(residuales)
+  }
+}
+```
+
+
+
+```{r, echo=FALSE}
+LogisticaGSK<-function(N,Nro.Estratos,X=X){
+  
+  # Funciones auxiliares###########################
+  
+  # Función que crea una matriz en bloque a partir de dos matrices
+  crea.bloque<-function(mat1,mat2){
+    nf1<-nrow(mat1);nc1<-ncol(mat1)
+    nf2<-nrow(mat2);nc2<-ncol(mat2)
+    mat1<-cbind(mat1,matrix(0,nrow=nf1,ncol=nc2))
+    mat2<-cbind(matrix(0,nrow=nf2,ncol=nc1),mat2)
+    matdef<-rbind(mat1,mat2)
+    return(matdef)
+  }
+  
+  # Genera  la A apropiada
+  
+  A<-kronecker(diag(rep(1,Nro.Estratos)),matrix(c(1,-1),nrow=1))
+  
+  
+  # Función que corrige los ceros convirtiéndolos en 0.5
+  
+  ceros.a.5<-function(Tabla){
+    Nro.col<-ncol(Tabla)
+    if(any(Tabla==0))Tabla<-matrix(ifelse(as.vector(Tabla)==0,0.5,Tabla),ncol=Nro.col)
+    return(Tabla)
+  }
+  
+  #################################################
+  
+  N<-matrix(t(N),ncol=1,byrow=F)
+  N<-ceros.a.5(N)
+  Nro.respuestas<-length(N)/Nro.Estratos
+  
+  
+  donde.voy<-0
+  for(i in 1:Nro.Estratos){
+    
+    identifica<-c('Estrato ',i)
+    
+    temp<-N[(donde.voy+1):(donde.voy+Nro.respuestas)]
+    
+    donde.voy<-donde.voy+Nro.respuestas
+    n.temp<-sum(temp)
+    
+    probab<-matrix(temp/n.temp,ncol=1)
+    
+    temp<- probab%*%t(probab)
+    temp2<-diag(as.vector(probab))
+    varcov.p<-(temp2-temp)/n.temp
+    
+    
+    if(i==1){
+      varcov.grande<-varcov.p
+      prob.grande<-probab
+    }
+    else{
+      varcov.grande<-crea.bloque(varcov.grande,varcov.p)
+      prob.grande<-rbind(prob.grande,probab)
+    }
+  }
+  
+  prob.estimada<-matrix(prob.grande,ncol=Nro.Estratos,byrow=T)
+  VCov.prob.estimada<-varcov.grande
+  
+  
+  
+  
+  D<-diag(as.vector(1/prob.grande))
+  varcov.grande<-D%*%varcov.grande%*%D
+  prob.grande<-log(prob.grande)
+  
+  varcov.grande.log<-varcov.grande
+  prob.grande.log<-prob.grande
+  
+  
+  
+  f=A%*%matrix(prob.grande,ncol=1)
+  varcov.f<-A%*%varcov.grande%*%t(A)
+  
+  
+  
+  #print('********** Estimación del modelo *****************')
+  temp<-t(X)%*%solve(varcov.f)
+  varcov.b<-solve(temp%*%X)
+  beta<-varcov.b%*%temp%*%f
+  valores.z<-beta/sqrt(diag(varcov.b))
+  estadisticos<-cbind(beta,sqrt(diag(varcov.b)),valores.z,2*pnorm(abs(valores.z),lower.tail=F))
+  colnames(estadisticos)<-c('beta','error','z-value','p-value')
+  # print(estadisticos)
+  # print('*********************************************')
+  # print('Matriz de varianzas y covarianzas de beta')
+  # print(varcov.b)
+  # print('*********************************************')
+  # print('Prueba Ho:b1=b2=...=bk=0') # Se asume intercepto
+  valor.chi<-t(beta[-1])%*%solve(varcov.b[-1,-1])%*%beta[-1]
+  
+  #print(c('Chicuadrardo calculado: ',valor.chi))
+  gl=nrow(varcov.b)-1
+  valor.p=pchisq(valor.chi,gl,lower.tail=F)
+  print(c('Valor-p: ',valor.p))
+  # print('*********************************************') 
+  
+  f.gorro<-X%*%beta
+  varcov.fg<-X%*%varcov.b%*%t(X)
+  
+  error.fg<-sqrt(diag(varcov.fg))
+  
+  #print('*********  Residuales **********')
+  
+  residuales<-f-f.gorro
+  
+  Btemp<-diag(1,length(f))-X%*%varcov.b%*%temp
+  Sigma.e<-Btemp%*%varcov.f%*%t(Btemp)
+  error.res<-sqrt(1/diag(Sigma.e))
+  
+  res.est<-residuales*error.res
+  
+  # list(prob.estimada=prob.estimada,
+  #      VCov.prob.estimada=VCov.prob.estimada,
+  #      prob.grande.log=prob.grande.log,
+  #      varcov.grande.log=varcov.grande.log,
+  #      logits<-f,
+  #      VCov.logits<-varcov.f,
+  #      beta=beta,
+  #      VCov.beta=varcov.b,
+  #      logits.estimados=f.gorro,
+  #      VCov.logits.est=varcov.fg,
+  #      residuales.logits=residuales,
+  #      residuales.logits.stand=res.est
+  # )
+  
+} # FIN Función LogisticaGSK ***************************************************
+
+```
+
+
+```{r, echo=FALSE}
+# Programa que emula el GSK para ajustar una regresion logistica para tablas
+# Funcion LogisticaGSK
+# N: Tabla de frecuencias
+# Nro.Estratos: Numero de subpoblaciones
+# X: Matriz de dise~no f=Xb+e
+LogisticaGSK2<-function(N,Nro.Estratos,X=X){
+  # Funciones auxiliares###########################
+  # Funcion que crea una matriz en bloque a partir de dos matrices
+  crea.bloque<-function(mat1,mat2){
+    nf1<-nrow(mat1);nc1<-ncol(mat1)
+    nf2<-nrow(mat2);nc2<-ncol(mat2)
+    mat1<-cbind(mat1,matrix(0,nrow=nf1,ncol=nc2))
+    mat2<-cbind(matrix(0,nrow=nf2,ncol=nc1),mat2)
+    matdef<-rbind(mat1,mat2)
+    return(matdef)
+  }
+  # Genera la A apropiada
+  A<-kronecker(diag(rep(1,Nro.Estratos)),matrix(c(1,-1),nrow=1))
+  # Funcion que corrige los ceros convirtiendolos en 0.5
+  ceros.a.5<-function(Tabla){
+    Nro.col<-ncol(Tabla)
+    if(any(Tabla==0))Tabla<-matrix(ifelse(as.vector(Tabla)==0,
+                                          0.5,Tabla),ncol=Nro.col)
+    return(Tabla)
+  }
+  N<-matrix(t(N),ncol=1,byrow=F)
+  N<-ceros.a.5(N)
+  Nro.respuestas<-length(N)/Nro.Estratos             
+  donde.voy<-0
+  for(i in 1:Nro.Estratos){
+    print('================================================')
+    identifica<-c('Estrato ',i)
+    print(identifica)
+    temp<-N[(donde.voy+1):(donde.voy+Nro.respuestas)]
+    print('Frecuencias de la subpoblacion')
+    print(temp)
+    donde.voy<-donde.voy+Nro.respuestas
+    n.temp<-sum(temp)
+    probab<-matrix(temp/n.temp,ncol=1)
+    temp<- probab%*%t(probab)
+    temp2<-diag(as.vector(probab))
+    varcov.p<-(temp2-temp)/n.temp
+    print('p estimado del estrato')
+    print(t(probab))
+    print('Matriz de varianzas y covarianzas estimada del estrato')
+    print(varcov.p)
+    if(i==1){
+      varcov.grande<-varcov.p
+      prob.grande<-probab
+    }
+    else{
+      varcov.grande<-crea.bloque(varcov.grande,varcov.p)
+      prob.grande<-rbind(prob.grande,probab)
+    }
+  }
+  print('================================================')
+  D<-diag(as.vector(1/prob.grande))
+  varcov.grande<-D%*%varcov.grande%*%D
+  prob.grande<-log(prob.grande)
+  print('Logaritmo del vector de probabilidades completo')
+  print(prob.grande)
+  print('Matriz de covarianzas del log de las
+prob. estimadas')
+  print(varcov.grande)
+  print('================================================')
+  f=A%*%matrix(prob.grande,ncol=1)
+  varcov.f<-A%*%varcov.grande%*%t(A)
+  print('f estimado ')
+  print(f)
+  print('Matriz de varianzas y covarianzas de f')
+  print(varcov.f)
+  print('********** Estimacion del modelo *****************')
+  temp<-t(X)%*%solve(varcov.f)
+  varcov.b<-solve(temp%*%X)
+  beta<-varcov.b%*%temp%*%f
+  valores.z<-beta/sqrt(diag(varcov.b))
+  estadisticos<-cbind(beta,sqrt(diag(varcov.b)),
+                      valores.z,2*pnorm(abs(valores.z),lower.tail=F))
+  colnames(estadisticos)<-c('beta','error','z-value','p-value')
+  print(estadisticos)
+  print('*********************************************')
+  print('Matriz de varianzas y covarianzas de beta')
+  print(varcov.b)
+  print('*********************************************')
+  print('Prueba Ho:b1=b2=...=bk=0') # Se asume intercepto
+  valor.chi<-t(beta[-1])%*%solve(varcov.b[-1,-1])%*%beta[-1]
+  print(c('Chicuadrardo calculado: ',valor.chi))
+  gl=nrow(varcov.b)-1
+  valor.p=pchisq(valor.chi,gl,lower.tail=F)
+  print(c('Valor-p: ',valor.p))
+  print('*********************************************')
+  f.gorro<-X%*%beta
+  varcov.fg<-X%*%varcov.b%*%t(X)
+  print('Matriz de varianzas y covarianzas de la f predicha')
+  print(varcov.fg)
+  error.fg<-sqrt(diag(varcov.fg))
+  print('f predicha')
+  print(f.gorro)
+  print('Errores est?ndares de la f.predicha')
+  print(error.fg)
+  print('********* Residuales **********')
+  residuales<-f-f.gorro
+  print('Residuales=f.estimada-f.predicha')
+  print(residuales)
+  Btemp<-diag(1,length(f))-X%*%varcov.b%*%temp
+  Sigma.e<-Btemp%*%varcov.f%*%t(Btemp)
+  error.res<-sqrt(1/diag(Sigma.e))
+  res.est<-residuales*error.res
+  #res.est<-chol(solve(Sigma.e))%*%residuales
+  print('Residuales estandarizados')
+  print(res.est)
+} # FIN Funcion LogisticGSK ********************************
+
+
+
+
+```
+
+
+<br>
+
+
+<h2> <center>  Modelo de regresión logisticos mediante GSK en donde la variable respuesta es el Resultado obtenido en la prueba saber ICFES </center> </h2>
+
+(Todos las conclusiones se basan en el Valor p, el cual nos permite identificar que variables realmente tienen influencia en la variable respuesta que es el resultado de los estudiantes en la prueba saber ICFES)
+
+
+#### Modelo 1
+
+**Se ajusta un modelo de regresión logistico** considerando como variable respuesta el resultado obtenido en la prueba saber ICFES, el cual es una variable binaria (Bueno, Malo) en función de la covariable tipo de colegio que tiene dos niveles (Oficial, No oficial) con el fin de saber si el hecho de pertenecer a un colegio publico o privado influye en los resultados obtenidos en la prueba saber
+
+
+**Tabla de contingencia entre el Resultado vs Tipo de colegio**
+
+```{r, echo=FALSE}
+library(kableExtra)
+tabla1 <- table(Base_trabajo_final_binaria$Tipo_de_colegio,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+$$Valor~p=0$$
+
+```{r, eval=F, echo=F}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+tipo<-c(1,0)
+resu<-glm(tabla1~tipo,family='binomial')
+summary(resu)
+```
+
+
+Dado que el valor p es pequeño la variable Tipo de colegio es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de estar en una institusión pública o privada afecta el resultado obtenido en la prueba saber ICFES.
+
+<br>
+
+Dado que el tipo de colegio tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber cual tipo de colegio es el que tiende a tener mejores resultados:
+
+```{r, fig.align="center", echo=FALSE}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Tipo_de_colegio,Base_trabajo_final_binaria$resultado), 1)[1,], main="Colegio No oficial", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Tipo_de_colegio,Base_trabajo_final_binaria$resultado), 1)[2,], main="Colegio Oficial", col="cyan4")
+grid()
+```
+
+
+* En base al gráfico anterior es evidente que los Colegios No oficiales (Colegios privados) tienen un mayor porcentaje de estudiantes que tienden a sacar buenos resultados en la prueba, por otro lado los colegios Oficiales (colegios Públicos) el mayor porcentaje de sus estudiantes tienden a obtener malos resultados, lo que indica que en base al modelo planteado se resalta la influencia del tipo de colegio en el resultado en la prueba y se debe porque los colegios No Oficiales tienden a tener mejores resultados que los colegios oficiales.
+
+<hr>
+
+#### Modelo 2 al 6
+
+
+**Se ajustan varios modelos de regresión logistico** considerando como variable respuesta el resultado obtenido en la prueba saber ICFES, el cual es una variable binaria (Bueno, Malo) en función de las covariable asociadas a las discapacidades que tienen dos niveles (sin discapacidad, con discapacidad) con el fin de saber si el hecho el de tener cierta discapacidad influye en los resultados obtenidos en la prueba saber
+
+
+**Tabla de contingencia entre el Resultado vs Discapacidad de sordo ceguera**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_sordoceguera,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=0.528484920318219$$
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es grande la variable que indica si el estudiante sufre de la discapacidad de sordo ceguera no es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad no afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Discapacidad cognitiva**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_cognitiva,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=2.33171398919091 \times 10^{-49}$$
+
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante sufre de la discapacidad cognitiva es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+Dado que la discapacidad cognitiva tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicha discapacidad favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_cognitiva,Base_trabajo_final_binaria$resultado), 1)[1,], main="Con discapacidad", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_cognitiva,Base_trabajo_final_binaria$resultado), 1)[2,], main="Sin discapacidad", col="cyan4")
+grid()
+```
+
+* En general a los estudiantes que tiene la discapacidad congitiva tienden a obtener resultados malos en prueba saber ICFES, lo cual era de esperarse ya que se les dificultas resolver y comprender de manera correctas las preguntas elaboradas en este test, por lo que las personas que sufren de dicha discapacidad deben ser evaluados de una manera especial, por otro lados los estudiantes que no padecen de dicha discapacidad hay una proporción muy similar de estudiantes que obtienen buenos y malos resultados en la prueba, ya que de antemano por la categorización de la variable respuesta era de esperarse.
+
+
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Discapacidad invidente**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_invidente,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=0.252997833966245$$
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es grande la variable que indica si el estudiante sufre de la discapacidad de invidente no es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad no afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Discapacidad motriz**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_motriz,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p= 2.5096684792299 \times 10^{-16}$$
+
+```{r, eval=FALSE, echo=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+Dado que el valor p es pequeño la variable que indica si el estudiante sufre de la discapacidad motriz no es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+Dado que la discapacidad motriz tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicha discapacidad favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_motriz,Base_trabajo_final_binaria$resultado), 1)[1,], main="Con discapacidad", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_motriz,Base_trabajo_final_binaria$resultado), 1)[2,], main="Sin discapacidad", col="cyan4")
+grid()
+```
+
+
+* En general a los estudiantes que tiene la discapacidad motriz tienden a obtener resultados malos en prueba saber ICFES, lo cual era de esperarse ya que tienen dificultades corporales y esto afecta su formación y educación y no pueden resolver y comprender de manera correctas las preguntas elaboradas en este test, por lo que las personas que sufren de dicha discapacidad deben ser evaluados de una manera especial, por otro lados los estudiantes que no padecen de dicha discapacidad hay una proporción muy similar de estudiantes que obtienen buenos y malos resultados en la prueba, ya que de antemano por la categorización de la variable respuesta era de esperarse.
+
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Discapacidad de sordo interprete**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_sordointerprete,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=6.01790664824613 \times 10^{-35}$$
+
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante sufre de la discapacidad sordo interprete es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+Dado que la discapacidad sordo interprete tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicha discapacidad favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_sordointerprete,Base_trabajo_final_binaria$resultado), 1)[1,], main="Con discapacidad", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_sordointerprete,Base_trabajo_final_binaria$resultado), 1)[2,], main="Sin discapacidad", col="cyan4")
+grid()
+```
+
+
+* En general a los estudiantes que tiene la discapacidad de sordo interprete tienden a obtener resultados malos en prueba saber ICFES, lo cual era de esperarse ya que tienen dificultades para escuchar y esto de alguna manera u otra interviene en el proceso de formación y educación, por lo tanto no pueden resolver y comprender de manera correctas las preguntas elaboradas en este test, por lo que las personas que sufren de dicha discapacidad deben ser evaluados de una manera especial, por otro lados los estudiantes que no padecen de dicha discapacidad hay una proporción muy similar de estudiantes que obtienen buenos y malos resultados en la prueba, ya que de antemano por la categorización de la variable respuesta era de esperarse.
+
+
+
+
+<br>
+
+**Tabla de contingencia entre el Resultado vs Discapacidad de sordo no interprete**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Disc_sordonointerprete,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+```
+
+$$Valor~p: 6.39363248897499 \times 10^{-9}$$
+
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es pequeño la variable que indica si el estudiante sufre de la discapacidad sordo no interprete es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de padecer o no dicha discapacidad afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+Dado que la discapacidad sordo no interprete tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicha discapacidad favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_sordonointerprete,Base_trabajo_final_binaria$resultado), 1)[1,], main="Con discapacidad", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Disc_sordonointerprete,Base_trabajo_final_binaria$resultado), 1)[2,], main="Sin discapacidad", col="cyan4")
+grid()
+```
+
+
+* En general a los estudiantes que tiene la discapacidad de sordo no interprete tienden a obtener resultados malos en prueba saber ICFES, lo cual era de esperarse ya que tienen dificultades para escuchar, adicionalmente de interpretar y tener una comunicación más acertiva y esto de alguna manera u otra interviene en el proceso de formación y educación, por lo tanto no pueden resolver y comprender de manera correctas las preguntas elaboradas en este test, por lo que las personas que sufren de dicha discapacidad deben ser evaluados de una manera especial, por otro lados los estudiantes que no padecen de dicha discapacidad hay una proporción muy similar de estudiantes que obtienen buenos y malos resultados en la prueba, ya que de antemano por la categorización de la variable respuesta era de esperarse.
+
+
+
+
+<br>
+
+**Conclusión**: Las discapacidades que tienen realmente una influencia sobre los resultados de los estudiantes en la prueba saber ICFES son: discpacidad cognitiva, motriz, de sordo interprete y sordo no interprete.
+
+
+
+#### Modelo 7 al 10
+
+
+**Se ajustan varios modelos de regresión logistico** considerando como variable respuesta el resultado obtenido en la prueba saber ICFES, el cual es una variable binaria (Bueno, Malo) en función de las covariable asociadas a los paratos tecnologicos o servicios que posee el estudiante los cuales tienen dos niveles (no tiene, si tiene) con el fin de saber si el hecho el de tener cierta aparato electronico o servicio influye en los resultados obtenidos en la prueba saber
+
+
+**Tabla de contingencia entre el Resultado vs Telefonia**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Telefonia,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=0$$
+
+
+```{r, eval=F, echo=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante posee o no telefonia es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de tener telefonia o no afecta el resultado obtenido en la prueba saber ICFES.
+
+<br>
+
+Dado que  poseer telefonia tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicho servicio favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Telefonia,Base_trabajo_final_binaria$resultado), 1)[1,], main="Sin Telefonia", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Telefonia,Base_trabajo_final_binaria$resultado), 1)[2,], main="Con telefonia", col="cyan4")
+grid()
+```
+
+
+* Mediante las gráficas es notable que le mayoria de estudiantes que no tienen telefonia,  tienden a sacar malos resultados en la prueba saber ICFES, por otro lado la mayoria de estudiantes que si tienen telefonia tienden a sacar buenos resultados en la prueba, por lo tanto en conclusión favorece el desempeño obtenido en la prueba saber ICFES contar con un servicio de telefonia en el hogar del estudiante, ya que este puede servir en su proceso de educación, como tener contacto con demás compañeros (Este conjunto de datos es del año 2013, epoca en la que era más común tener teléfonia en el hogar, ya que actualmente es algo que no tiene el mismo uso).
+
+
+
+
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Celular**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Celular,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+library(kableExtra)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+$$Valor~p=1.13378875181432 \times 10^{-30}$$
+
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante posee o no celular es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de tener celular o no afecta el resultado obtenido en la prueba saber ICFES.
+
+
+
+<br>
+
+Dado que  poseer Celular tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicho aparato tecnologico favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Celular,Base_trabajo_final_binaria$resultado), 1)[1,], main="Sin Celular", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Celular,Base_trabajo_final_binaria$resultado), 1)[2,], main="Con Celular", col="cyan4")
+grid()
+```
+
+
+* Mediante las gráficas es notable que le mayoria de estudiantes que no tienen celular,  tienden a sacar malos resultados en la prueba saber ICFES, por otro lado la mayoria de estudiantes que si tienen celular el porcentaje de estudiantes que sacan buenos y malos resultados es muy similar, por lo tanto en conclusión favorece el desempeño obtenido en la prueba saber ICFES contar con celular, aunque tiene más impacto la telefonia en el hogar del estudiante que el uso del celular, puede deberse a el uso que se le de a estos, ya que no siempre es para fines académicos. 
+
+<br>
+
+
+**Tabla de contingencia entre el Resultado vs Internet**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Internet,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=0$$
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante posee o no Internet es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de tener Internet o no afecta el resultado obtenido en la prueba saber ICFES.
+
+
+
+<br>
+
+Dado que  poseer servicio de Internet en el hogar tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicho servicio favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Internet,Base_trabajo_final_binaria$resultado), 1)[1,], main="Sin Internet", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Internet,Base_trabajo_final_binaria$resultado), 1)[2,], main="Con Internet", col="cyan4")
+grid()
+```
+
+
+* Mediante las gráficas es notable que le mayoria de estudiantes que no tienen internet,  tienden a sacar malos resultados en la prueba saber ICFES, por otro lado la mayoria de estudiantes que si tienen internet tienden a sacar buenos resultados en la prueba saber ICFES, por lo tanto se nota evidentemente que el hecho de poseer el servicio de internet en el hogar del estudiante, si tiene algún impacto en su proceso de educación y este se ve reflejado en los resultados obtenidos en la prueba saber ICFES.
+
+<br>
+
+
+
+**Tabla de contingencia entre el Resultado vs Televisión**
+
+```{r, echo=FALSE}
+tabla1 <- table(Base_trabajo_final_binaria$Televisión,Base_trabajo_final_binaria$resultado)
+X <-matrix(c(1,1,1,0),ncol=2,byrow=T)
+kable(tabla1) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+$$Valor~p=0$$
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK(tabla1, 2, X=X)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+LogisticaGSK2(tabla1, 2, X=X)
+```
+
+
+
+
+Dado que el valor p es muy pequeño la variable que indica si el estudiante posee o no televisión es significativa respecto a los resultados de los estudiantes en la prueba saber ICFES, es decir, el hecho de tener televisión o no afecta el resultado obtenido en la prueba saber ICFES.
+
+
+<br>
+
+Dado que poseer televisión en el hogar tiene influencia sobre el resultado obtenido en la pruebas saber ICFES, queremos saber si tener dicho aparato tecnologico favorece o desfavorece los resultados que se obtienen en la prueba:
+
+```{r, echo=FALSE, fig.align="center"}
+par(mfrow=c(1,2))
+barplot(prop.table(table(Base_trabajo_final_binaria$Televisión,Base_trabajo_final_binaria$resultado), 1)[1,], main="Sin Televisión", col="cyan4")
+grid()
+
+barplot(prop.table(table(Base_trabajo_final_binaria$Televisión,Base_trabajo_final_binaria$resultado), 1)[2,], main="Con Televisión", col="cyan4")
+grid()
+```
+
+
+* Mediante las gráficas es notable que le mayoria de estudiantes que no tienen televisión,  tienden a sacar malos resultados en la prueba saber ICFES, por otro lado la mayoria de estudiantes que si tienen televisión tienden a sacar buenos resultados en la prueba saber ICFES, por lo tanto se nota evidentemente que el hecho de tener televisón en el hogar del estudiante, si tiene algún impacto en su proceso de educación y este se ve reflejado en los resultados obtenidos en la prueba saber ICFES.
+
+<br>
+
+
+**Conclusión:** En general el hecho de poseer o no cada uno de los aparatos electronicos o servicios del hogar del estudiante, influye en los resultados que el estudiante obtiene en la prueba saber ICFES y en general estos aparatos o servicios ayudan en el proceso de formación y educación del estudiante por lo tanto es recomendable poseerlos, pero darles un uso adecuado.
+
+<br>
+
+
+<hr>
+
+
+### Ajuste de modelos GSK donde la covariable tiene más de dos niveles
+
+```{r,echo=FALSE}
+# Programa que emula el GSK para ajustar una regresión logística para tablas
+
+# Función LogisticaGSK
+# N: Tabla de frecuencias
+# Nro.Estratos: Número de subpoblaciones
+# A: Matriz que determina las relaciones entre las probabilidades f=Ap
+#    Puede entrarse la matriz A completa  o
+#    las relaciones que se dan en cada subpoblaci?n, en este caso se entra una 
+#    sola fila.
+
+# X: Matriz de diseño f=Xb+e
+
+
+
+LogisticaGSK4<-function(N,Nro.Estratos,X=X){
+
+# Funciones auxiliares###########################
+
+# Función que crea una matriz en bloque a partir de dos matrices
+crea.bloque<-function(mat1,mat2){
+ nf1<-nrow(mat1);nc1<-ncol(mat1)
+ nf2<-nrow(mat2);nc2<-ncol(mat2)
+ mat1<-cbind(mat1,matrix(0,nrow=nf1,ncol=nc2))
+ mat2<-cbind(matrix(0,nrow=nf2,ncol=nc1),mat2)
+ matdef<-rbind(mat1,mat2)
+ return(matdef)
+}
+
+# Genera  la A apropiada
+
+A<-kronecker(diag(rep(1,Nro.Estratos)),matrix(c(1,-1),nrow=1))
+
+
+# Función que corrige los ceros convirtiéndolos en 0.5
+
+ceros.a.5<-function(Tabla){
+Nro.col<-ncol(Tabla)
+if(any(Tabla==0))Tabla<-matrix(ifelse(as.vector(Tabla)==0,0.5,Tabla),ncol=Nro.col)
+return(Tabla)
+}
+
+#################################################
+
+ N<-matrix(t(N),ncol=1,byrow=F)
+ N<-ceros.a.5(N)
+ Nro.respuestas<-length(N)/Nro.Estratos
+ 
+ 
+ donde.voy<-0
+ for(i in 1:Nro.Estratos){
+ 
+  identifica<-c('Estrato ',i)
+ 
+  temp<-N[(donde.voy+1):(donde.voy+Nro.respuestas)]
+ 
+  donde.voy<-donde.voy+Nro.respuestas
+  n.temp<-sum(temp)
+
+  probab<-matrix(temp/n.temp,ncol=1)
+
+  temp<- probab%*%t(probab)
+  temp2<-diag(as.vector(probab))
+  varcov.p<-(temp2-temp)/n.temp
+  
+  
+  if(i==1){
+   varcov.grande<-varcov.p
+   prob.grande<-probab
+  }
+  else{
+   varcov.grande<-crea.bloque(varcov.grande,varcov.p)
+   prob.grande<-rbind(prob.grande,probab)
+  }
+ }
+ 
+ prob.estimada<-matrix(prob.grande,ncol=Nro.Estratos,byrow=T)
+ VCov.prob.estimada<-varcov.grande
+
+ 
+ 
+ 
+    D<-diag(as.vector(1/prob.grande))
+    varcov.grande<-D%*%varcov.grande%*%D
+    prob.grande<-log(prob.grande)
+	
+	 varcov.grande.log<-varcov.grande
+   prob.grande.log<-prob.grande
+	
+ 
+ 
+  f=A%*%matrix(prob.grande,ncol=1)
+  varcov.f<-A%*%varcov.grande%*%t(A)
+ 
+
+ 
+  print('********** Estimación del modelo *****************')
+  temp<-t(X)%*%solve(varcov.f)
+  varcov.b<-solve(temp%*%X)
+  beta<-varcov.b%*%temp%*%f
+  valores.z<-beta/sqrt(diag(varcov.b))
+  estadisticos<-cbind(beta,sqrt(diag(varcov.b)),valores.z,2*pnorm(abs(valores.z),lower.tail=F))
+  colnames(estadisticos)<-c('beta','error','z-value','p-value')
+  print(estadisticos)
+  print('*********************************************')
+  
+  print('Prueba Ho:b1=b2=...=bk=0') # Se asume intercepto
+  print('*********************************************')
+  valor.chi<-t(beta[-1])%*%solve(varcov.b[-1,-1])%*%beta[-1]
+
+  print(c('Chicuadrardo calculado: ',valor.chi))
+  gl=nrow(varcov.b)-1
+  valor.p=pchisq(valor.chi,gl,lower.tail=F)
+  print(c('Valor-p: ',valor.p))
+  print('*********************************************') 
+  
+  f.gorro<-X%*%beta
+  varcov.fg<-X%*%varcov.b%*%t(X)
+ 
+  error.fg<-sqrt(diag(varcov.fg))
+ 
+  #print('*********  Residuales **********')
+
+  residuales<-f-f.gorro
+  
+  Btemp<-diag(1,length(f))-X%*%varcov.b%*%temp
+  Sigma.e<-Btemp%*%varcov.f%*%t(Btemp)
+  error.res<-sqrt(1/diag(Sigma.e))
+
+  res.est<-residuales*error.res
+  
+  list(prob.estimada=prob.estimada,
+VCov.prob.estimada=VCov.prob.estimada,
+prob.grande.log=prob.grande.log,
+varcov.grande.log=varcov.grande.log,
+logits<-f,
+VCov.logits<-varcov.f,
+beta=beta,
+VCov.beta=varcov.b,
+logits.estimados=f.gorro,
+VCov.logits.est=varcov.fg,
+residuales.logits=residuales,
+residuales.logits.stand=res.est
+)
+
+} # FIN Función LogisticaGSK ***************************************************
+
+```
+
+
+**Modelo de regresión logistico de resultado vs economia del estudiante**
+
+Tabla de contingencia asoaciado al modelo:
+
+```{r, echo=FALSE}
+N <- table(Base_trabajo_final_binaria$Economia_estudiante, Base_trabajo_final_binaria$resultado)
+
+
+kable(N, row.names = T) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+
+```{r, echo=FALSE, eval=FALSE}
+temp<-diag(rep(1,10))[,-1]
+X<-cbind(1,temp)
+res<-LogisticaGSK(N,10,X=X)
+```
+
+$$Valor ~ p=0$$
+
+
+La economia del estudiante es una variable significativa o que tiene influencia sobre los resultados obtenidos en la prueba saber ICFES, examinemos esta relación mediante el siguiente gráfico:
+
+
+```{r, echo=FALSE, fig.align="center"}
+Tabla <- prop.table(table(Base_trabajo_final_binaria$Economia_estudiante, Base_trabajo_final_binaria$resultado), 1)
+
+
+plot(Tabla[,1], pch=19, type="b", col="cyan4", ylim=c(0,1), xlab="Nivel de economia del estudiante", ylab="Porcentaje de estudiantes", las=2, xaxt="n")
+lines(Tabla[,2], pch=19, type="b", col="salmon")
+abline(h=0.5)
+axis(1, at=1:10)
+grid()
+legend("topleft", legend=c("Bueno", "Malo"),
+       col=c("cyan4", "salmon"), lty=1)
+
+```
+
+
+
+* Mediante el gráfico se puede notar que la relación existente es que estudiantes cuyo nivel de economia es bajo, la mayoria tienden a sacar malos resultados en la prueba, por otro lado la mayoria de estudiantes con niveles de economia más altos (nivel 5 para arriba) tienden a sacar buenos resultados en la prueba, por lo tanto se puede concluir que el nivel de riqueza del estudiante tiene algún impacto en el proceso de formación académica de este.
+
+
+<br>
+
+
+
+**Modelo de regresión logistico de resultado vs economia del colegio**
+
+Tabla de contingencia asoaciado al modelo:
+
+```{r, echo=FALSE}
+N <- table(Base_trabajo_final_binaria$Economia_colegio, Base_trabajo_final_binaria$resultado)
+
+
+kable(N, row.names = T) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+
+```{r, echo=FALSE, eval=FALSE}
+temp<-diag(rep(1,10))[,-1]
+X<-cbind(1,temp)
+res<-LogisticaGSK(N,10,X=X)
+```
+
+$$Valor ~ p=0$$
+
+
+La economia del colegio del estudiante es una variable significativa o que tiene influencia sobre los resultados obtenidos en la prueba saber ICFES, examinemos esta relación mediante el siguiente gráfico:
+
+
+```{r, echo=FALSE, fig.align="center"}
+Tabla <- prop.table(table(Base_trabajo_final_binaria$Economia_colegio, Base_trabajo_final_binaria$resultado), 1)
+
+
+plot(Tabla[,1], pch=19, type="b", col="cyan4", ylim=c(0,1), xlab="Nivel de economia del colegio", ylab="Porcentaje de estudiantes", las=2, xaxt="n")
+lines(Tabla[,2], pch=19, type="b", col="salmon")
+abline(h=0.5)
+axis(1, at=1:10)
+grid()
+legend("topleft", legend=c("Bueno", "Malo"),
+       col=c("cyan4", "salmon"), lty=1)
+
+```
+
+* Mediante el gráfico se puede notar que la relación existente es que estudiantes cuyo nivel de economia delcolegio es bajo, la mayoria tienden a sacar malos resultados en la prueba, por otro lado la mayoria de estudiantes con niveles de economia del colegio son más altos (nivel 7 para arriba) tienden a sacar buenos resultados en la prueba, por lo tanto se puede concluir que el nivel de riqueza del colegio del estudiante tiene algún impacto en el proceso de formación académica de este.
+
+
+<br>
+
+**Modelo de regresión logistico de resultado vs Jornada**
+
+Tabla de contingencia asoaciado al modelo:
+
+```{r, echo=FALSE}
+N <- table(Base_trabajo_final_binaria$Jornada, Base_trabajo_final_binaria$resultado)
+
+
+kable(N, row.names = T) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+
+```{r, echo=FALSE, eval=FALSE}
+temp<-diag(rep(1,5))[,-1]
+X<-cbind(1,temp)
+res<-LogisticaGSK(N,5,X=X)
+```
+
+$$Valor ~ p=0$$
+
+
+La jornada de estudio del estudiante es una variable significativa o que tiene influencia sobre los resultados obtenidos en la prueba saber ICFES, examinemos esta relación mediante el siguiente gráfico:
+
+
+```{r, echo=FALSE, fig.align="center"}
+Tabla <- prop.table(table(Base_trabajo_final_binaria$Jornada, Base_trabajo_final_binaria$resultado), 1)
+
+
+plot(Tabla[,1], pch=19, type="b", col="cyan4", ylim=c(0,1), xlab="Jornada", ylab="Porcentaje de estudiantes", las=2, xaxt="n")
+lines(Tabla[,2], pch=19, type="b", col="salmon")
+abline(h=0.5)
+axis(1, at=1:5, levels(Base_trabajo_final_binaria$Jornada), las =2, cex.axis=0.5)
+grid()
+legend("topleft", legend=c("Bueno", "Malo"),
+       col=c("cyan4", "salmon"), lty=1)
+
+```
+
+
+
+* Mediante el gráfico se puede notar que la jornada de estudio de la mañana y la tarde hay un porcentaje muy similar de estudiante que obtienen buenos y malos resultados en la prueba saber, por otro lado las jornadas de la noche y sabatina dominical, la mayoria de sus estudiantes obtienen malos resultados en la prueba y por último la jornada completa u ordinaria es la que se destaca por tener mayor porcentaje de estudiantes que obtienen buenos resultados enn la prueba saber ICFES.
+
+
+
+
+<br>
+
+**Modelo de regresión logistico de resultado vs Calendario**
+
+Tabla de contingencia asoaciado al modelo:
+
+```{r, echo=FALSE}
+N <- table(Base_trabajo_final_binaria$Calendario, Base_trabajo_final_binaria$resultado)
+
+
+kable(N, row.names = T) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+
+```{r, echo=FALSE, eval=F}
+temp<-diag(rep(1,3))[,-1]
+X<-cbind(1,temp)
+res<-LogisticaGSK(N,3,X=X)
+```
+
+$$Valor ~ p=0$$
+
+
+La Calendario del estudiante es una variable significativa o que tiene influencia sobre los resultados obtenidos en la prueba saber ICFES, examinemos esta relación mediante el siguiente gráfico:
+
+
+```{r, echo=FALSE, fig.align="center"}
+Tabla <- prop.table(table(Base_trabajo_final_binaria$Calendario, Base_trabajo_final_binaria$resultado), 1)
+
+
+plot(Tabla[,1], pch=19, type="b", col="cyan4", ylim=c(0,1), xlab="Calendario", ylab="Porcentaje de estudiantes", las=2, xaxt="n")
+lines(Tabla[,2], pch=19, type="b", col="salmon")
+abline(h=0.5)
+axis(1, at=1:3, levels(Base_trabajo_final_binaria$Calendario))
+grid()
+legend("topleft", legend=c("Bueno", "Malo"),
+       col=c("cyan4", "salmon"), lty=1)
+
+```
+
+
+
+* Mediante el gráfico se puede notar que el calendario A tiende a tener un mayor proporción de estudiantes que obtienen buenos resultados en la prueba, aunque el porcentaje de estudiantes con buenos y malos resultados no sea muy diferente, por otro lado para el calendario B hay una proporción muy similar de estudiantes que obtienen buenos y malos resultados y por último para el calendario F si es más marcado que la mayor propoción de estudiantes tienenden a sacar malos resultados en la prueba.
+
+
+
+
+<br>
+
+**Modelo de regresión logistico de resultado vs Departamento**
+
+Tabla de contingencia asoaciado al modelo:
+
+```{r, echo=FALSE}
+N <- table(Base_trabajo_final_binaria$Departamento, Base_trabajo_final_binaria$resultado)
+
+kable(N, row.names = T) %>%
+  kable_paper(bootstrap_options = "striped", full_width = F)%>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+```
+
+
+
+```{r, echo=FALSE, eval=FALSE}
+temp<-diag(rep(1,34))[,-1]
+X<-cbind(1,temp)
+res<-LogisticaGSK(N,34,X=X)
+```
+
+$$Valor ~ p=0$$
+
+
+La Calendario del estudiante es una variable significativa o que tiene influencia sobre los resultados obtenidos en la prueba saber ICFES, examinemos esta relación mediante el siguiente gráfico:
+
+
+```{r, echo=FALSE, fig.align="center"}
+Tabla <- prop.table(table(Base_trabajo_final_binaria$Departamento, Base_trabajo_final_binaria$resultado), 1)
+
+
+plot(Tabla[,1], pch=19, type="b", col="cyan4", ylim=c(0,1), xlab="Departamento", ylab="Porcentaje de estudiantes", las=2, xaxt="n")
+lines(Tabla[,2], pch=19, type="b", col="salmon")
+abline(h=0.5)
+axis(1, at=1:34, levels(Base_trabajo_final_binaria$Departamento), las=2, cex.axis=0.5)
+grid()
+legend("topleft", legend=c("Bueno", "Malo"),
+       col=c("cyan4", "salmon"), lty=1)
+
+```
+
+
+
+* Se destaca los departamentos los cuales tieneden a tener mayor porcentaje de estudiantes que obtienen buenos resultados en las pruebas:
+
+- Bogota, Boyaca, Caldas, Cundinamarca, Guainia, Huila, Meta, Nariño,Quindio, Risaralda y Santander.
+
+- Se resalta que el Choco es uno de los departamento que tiene el mayor porcentaje de estudiantes que obtienen malos resultados en la prueba, seguido del Magdalena, la Guajira, Vaupes, etc..
+
+
+<br>
+
+<hr>
+
+
+### Modelo de regresión logistico Multinomial
+
+En este caso se va a dejar de trabajar con la variable resultado (variable respuesta) como una variable binaria, si no que se trabajara con ella como era inicialmente, como una variable categorica de 10 niveles:
+
+```{r, echo=FALSE}
+nivel <- 1:10
+puesto_inf <- seq(1, 900, 100)
+puesto_sup <- seq(100, 1000, 100)
+Niveles <- paste("Nivel", nivel, ":")
+Puestos <- paste("Estudiantes que ocupan puestos del", puesto_inf, "al", puesto_sup)
+df <- data.frame(Niveles, Puestos)
+
+
+kable(df,  
+      caption = "Asignación de los niveles según el puesto ocupado en la prueba saber
+      ICFES") %>%
+  kable_paper("hover", full_width = F) %>%
+  row_spec(0, background = "#0E8276", color = "white")
+
+
+```
+
+<br>
+
+Dado que se analizo en los modelos planteados anteriormente que la variable Tipo de colegio, economia del estudiante y del colegio, Jornada, Calendario, Departamento, Discapacidades y apartos electronicos tienen una influencia o relación con el resultado en la prueba saber ICFES, se entra a análizar nuevamente estas variable pero en el caso de regresión logistica multinomial.
+
+
+**Modelo de regresión logistica multinomial en donde se tienen en cuenta las variables más significativas de los modelos anteriores conjuntamente**
+
+
+Se ajusta un modelo en donde la variable respuesta es resultado y las covariables son las siguientes variables categoricas:
+
++ Tipo_de_colegio 
++ Economia_estudiante
++ Economia_colegio
++ Jornada+Calendario
++ Disc_cognitiva
++ Disc_motriz
++ Telefonia
++ Internet
++ Televisión
+
+**Resumen del resultado del modelo**
+
+Todas las variables excepto discapacidad motriz son significativas para explicar el resultado que los estudiantes obtienen en la prueba saber ICFES.
+
+Quizas la variable discapacidad motriz dejo de ser significativa, debido a que no tenia tanto peso o capacidad de explicar la variable resultado como lo tenian las otras variables.
+
+```{r, echo=FALSE, eval=FALSE}
+modelo_glm <- glm(resultado ~ Tipo_de_colegio + Economia_estudiante+ Economia_colegio+Jornada+Calendario+Departamento+Disc_cognitiva+Disc_sordointerprete+Disc_motriz+Disc_sordonointerprete+Telefonia+Internet+Televisión, data = Base_trabajo_final,
+                  family = "binomial")
+summary(modelo_glm)
+```
+
+
+```{r, echo=FALSE}
+# Funcion que corrige los ceros convirtiendolos en 0.5
+ceros.a.5<-function(Tabla){
+  Nro.col<-ncol(Tabla)
+  if(any(Tabla==0))Tabla<-matrix(ifelse(as.vector(Tabla)==0,
+                                        0.5,Tabla),ncol=Nro.col)
+  Tabla
+}
+# Funcion GSK para la regresion multinomial
+# N: Tabla de frecuencias
+# Nro.Estratos: Numero de subpoblaciones
+# X: Matriz de dise~no f=Xb+e
+# Requiere librera MASS: funcion ginv
+multinomial.GSK<-function(N,Nro.Estratos,X,ordenada=TRUE){
+  
+  crea.bloque<-function(mat1,mat2){
+    nf1<-nrow(mat1);nc1<-ncol(mat1)
+    nf2<-nrow(mat2);nc2<-ncol(mat2)
+    mat1<-cbind(mat1,matrix(0,nrow=nf1,ncol=nc2))
+    mat2<-cbind(matrix(0,nrow=nf2,ncol=nc1),mat2)
+    matdef<-rbind(mat1,mat2)
+    return(matdef)
+  }
+  
+  require(MASS)
+  N<-matrix(t(N),ncol=1,byrow=F)
+  N<-ceros.a.5(N)
+  Nro.respuestas<-length(N)/Nro.Estratos
+  donde.voy<-0
+  for(i in 1:Nro.Estratos){
+    temp<-N[(donde.voy+1):(donde.voy+Nro.respuestas)]
+    print('Frecuencias de la subpoblacion')
+    print(temp)
+    donde.voy<-donde.voy+Nro.respuestas
+    n.temp<-sum(temp)
+    probab<-matrix(temp/n.temp,ncol=1)
+    temp<- probab%*%t(probab)
+    temp2<-diag(as.vector(probab))
+    varcov.p<-(temp2-temp)/n.temp
+    print('p estimado y matriz de varianzas y covarianzas')
+    print('Estrato ')
+    print(i)
+    print(probab)
+    print(varcov.p)
+    if(i==1){
+      varcov.grande<-varcov.p
+      prob.grande<-probab
+    }
+    else{
+      varcov.grande<-crea.bloque(varcov.grande,varcov.p)
+      prob.grande<-rbind(prob.grande,probab)
+    }
+  }
+  cat('****************** \n')
+  # Regresion logstica multinomial ordenada: logits acumulados
+  if(ordenada==TRUE){
+    A<-NULL
+    for(i in 1:(Nro.respuestas-1)){
+      A<-rbind(A,
+               c(rep(1,i),rep(0,Nro.respuestas-i)),
+               c(rep(0,i),rep(1,Nro.respuestas-i))
+      )
+    }
+  }
+  if(ordenada==FALSE){
+    A<-NULL
+    for(i in 1:(Nro.respuestas-1)){
+      tempA<-matrix(rep(0,Nro.respuestas),nrow=1)
+      tempA[i]<-1
+      tempB<-matrix(rep(1,Nro.respuestas),nrow=1)
+      tempB[i]<-0
+      A<-rbind(A,tempA,tempB)
+    }
+  }
+  print('Matriz A')
+  print(A)
+  # dim(A)
+  A<-kronecker(diag(rep(1,Nro.Estratos)),A)
+  f.temp=A%*%matrix(prob.grande,ncol=1)
+  varcov.f.temp<-A%*%varcov.grande%*%t(A)
+  log.f.temp<-log(f.temp)
+  Dtemp<-diag(1/as.vector(f.temp))
+  varcov.log.f.temp<-Dtemp%*%varcov.f.temp%*%t(Dtemp)
+  B<-kronecker(diag(rep(1,(Nro.respuestas-
+                             1)*Nro.Estratos)),matrix(c(1,-1),nrow=1))
+  f<-B%*%log.f.temp
+  varcov.f<-B%*%varcov.log.f.temp%*%t(B)
+  print('f observado')
+  print(f)
+  print('Matriz de Varianzas y Covarianzas de f observado')
+  print(varcov.f)
+  interceptos<-function(Nro.respuestas,Nro.pob){
+    N<-Nro.respuestas-1
+    A<-diag(rep(1,N))
+    Inter<-kronecker(matrix(rep(1,Nro.pob),ncol=1),A)
+    Inter
+  }
+  IA<-interceptos(Nro.respuestas,Nro.Estratos)
+  print('Parte de la matriz de dise~no asociada con los Interceptos')
+  print(IA)
+  print('Parte de la matriz de dise~no asociada con las covariables')
+  print(X)
+  if(nrow(X)==Nro.Estratos){
+    X.def<-NULL
+    for(i in 1:nrow(X)){
+      for(j in 1:(Nro.respuestas-1)) X.def<-rbind(X.def,X[i,])
+    }
+    X<-X.def
+  }
+  print(X)
+  X<-cbind(IA,X)
+  print('Matriz de dise~no completa')
+  print(X)
+  temp<-t(X)%*%ginv(varcov.f)
+  print(temp)
+  varcov.b<-ginv(temp%*%X)
+  beta<-varcov.b%*%temp%*%f
+  valores.z<-beta/sqrt(diag(varcov.b))
+  valores.p<-2*pnorm(abs(valores.z),lower.tail=F)
+  res.temp<-cbind(beta,sqrt(diag(varcov.b)),valores.z,valores.p)
+  print('Betas......Error Est......Valor Z......Valor-p')
+  print(res.temp)
+  print('Matriz de varianzas y covarianzas de beta')
+  print(varcov.b)
+  print(dim(varcov.b))
+  temp<-Nro.respuestas-1
+  print(temp)
+  temp.2<-varcov.b[-c(1:temp),-c(1:temp)]
+  print('Submatriz')
+  print(temp.2)
+  print(dim(temp.2))
+  inv.temp<-ginv(temp.2)
+  print(dim(inv.temp))
+  valor.chi<-t(beta[-c(1:temp)])%*%inv.temp %*%beta[-c(1:temp)]
+  print('Prueba Asociada con las Covariables')
+  print('Prueba Chi-cuadrado para Ho:b1=b2=...=bk=0')
+  print(valor.chi)
+  grados.lib<-nrow(inv.temp)
+  valorp<-pchisq(valor.chi,grados.lib,lower.tail=F)
+  print(c('Valor-p=',valorp))
+  f.gorro<-X%*%beta
+  varcov.fg<-X%*%varcov.b%*%t(X)
+  error.fg<-sqrt(diag(varcov.fg))
+  print('f estimada')
+  print(f.gorro)
+  print('Error de f')
+  print(error.fg)
+  print('Matriz de varianzas y covarianzas de la f estimada')
+  print(varcov.fg)
+  # Calculando la tabla de probabilidades estimadas por el modelo
+  f.matriz<-matrix(f.gorro,nrow=Nro.Estratos,byrow=T)
+  print('Funciones Respuesta')
+  print(f.matriz)
+  # Funcion que reconvierte un vector de respuestas f a
+  # un vector de probabilidades
+  if(ordenada==T){
+    f.a.pi<-function(f){
+      f.s.1.f<-exp(f)/(1+exp(f))
+      pi.pred<-f.s.1.f-c(0,f.s.1.f[-length(f)])
+      pi.pred<-c(pi.pred,1-sum(pi.pred))
+      pi.pred
+    } # Fin funcion f.a.pi() cuando reg. log. ordenada
+  }
+  if(ordenada==F){
+    f.a.pi<-function(f){
+      pi.pred<-exp(f)/(1+exp(f))
+      pi.pred<-c(pi.pred,1-sum(pi.pred))
+      pi.pred
+    } # Fin funcion f.a.pi() cuando reg. log. es NO ordenada
+  }
+  prob.res<-matrix(apply(f.matriz,1,f.a.pi),nrow=Nro.Estratos, byrow=T)
+  print('Probabilidades Predichas')
+  print(prob.res)
+  #print(apply(res,1,sum))
+  N<-matrix(N,nrow=Nro.Estratos,byrow=T)
+  prob.obs<-N/apply(N,1,sum)
+  print('Probabilidades Observadas con la correccion de ceros')
+  print(prob.obs)
+  # bajo el supuesto de que el modelo es correcto cada estrato
+  # tiene una matriz de var-cov. Tomamos los elementos de
+  # la diagonal principal que son las varianzas.
+  sd.modelo<-sqrt(prob.res*(1-prob.res)/apply(N,1,sum))
+  errores<-prob.obs-prob.res
+  print('Residuales Crudos')
+  print(errores)
+  errores.estandarizados<-errores/sd.modelo
+  print('Residuales Estandarizados')
+  print(errores.estandarizados)
+  par(xaxt='n')
+  matplot(t(errores.estandarizados),type='b',ylab='',xlab='')
+  title(main='Residuales Estandarizados por Estratos')
+  title(ylab='Residuales Estandarizados')
+  title(xlab='Categoras de la Respuesta')
+  # Calculo de valores crticos para los residuales
+  max.res<-function(x,p0){
+    n<-sum(x)
+    p.e<-x/n
+    res<-abs(p.e-p0)/sqrt(p0*(1-p0)/n)
+    res<-max(res)
+    return(res)
+  }
+  valor.critico<-function(p0,n){
+    muestra.b<-rmultinom(2000,n,p0)
+    res<-apply(muestra.b,2,max.res,p0)
+    res<-quantile(res,probs=0.95)
+    return(res)
+  }
+  n<-apply(N,1,sum)
+  val.crit<-rep(NA,nrow(prob.res))
+  for(i in 1:nrow(prob.res)){
+    val.crit[i]<-valor.critico(prob.res[i,],n[i])
+  }
+  print('Valores Criticos')
+  print(t(val.crit))
+  win.graph()
+  # Nro. de celdas graficas para residuales
+  par(mfrow=c(3,ceiling(nrow(prob.res)/3))) #<-----ESTE VALOR DEBE SER ESPECIFICADO
+  for(i in 1:nrow(N)){
+    plot(errores.estandarizados[i,],type='b',ylab='Residuales',
+         xlab='',ylim=c(-3,3))
+    abline(h=c(-val.crit[i],val.crit[i]),col='red',lty=2)
+  }
+} # Fin de la funcion
+
+```
+
+
+
+
+<br>
+
+### Conclusión final:
+
+
+Las variables como, Tipo de colegio, Economia del estudiante, Economia del colegio, Jornada, Calendario, Discapacidad cognitiva, Telefonia, Internet, Televisión son variables que tienen influencia o ayudan a explicar el rendimiento académico de los estudiantes en la prueba saber ICFES, por tanto se abre la iniciativa a investigar más a fondo el tema y realizar proyectos que mejoren el proceso de educación de los estudiantes en Colombia, ya que son factores que vienen directamente relacionados con el colegio y hogar del estudiante, además tambien es recomendable estudiar las variables de los resultados de las pruebas saber ICFES en años más actuales para asi comparar si variables que para el 2013 eran relevantes para otros años ya no lo sean.
+
+
+<br>
+
+
+### Referecias
+
+* Aguilera, A. M. (2001). Tablas de contingencia bidimensionales. Editorial: La Muralla.
+
+* Arteaga, P. (2008). Análisis de gráficos estadísticos elaborados en un proyecto de análisis de datos. Trabajo fin de Master. Departamento de Didáctica de la Matemática.
+
+* Hosmer DW LS. Applied logistic regression. Second edition ed. New York: Wiley; 2000. 
+
+* Ripley, B. D. (2001). The R project in statistical computing. MSOR Connections, 1(1).
+
+* Ruiz-Maya, L., Martín, F. J., Montero, J. M. y Uriz, P. (1995). Análisis estadístico de
+encuestas: datos cualitativos. Madrid. AC. 
+
+
+<br>
+</div>
+
+

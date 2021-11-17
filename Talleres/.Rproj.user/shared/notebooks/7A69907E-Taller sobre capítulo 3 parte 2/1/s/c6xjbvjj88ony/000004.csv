@@ -1,0 +1,2 @@
+"0","datos <- kidiq[order(kidiq[,3],kidiq[,5]), ]"
+"0","#persp(mom_age,mom_iq,kid_score)"

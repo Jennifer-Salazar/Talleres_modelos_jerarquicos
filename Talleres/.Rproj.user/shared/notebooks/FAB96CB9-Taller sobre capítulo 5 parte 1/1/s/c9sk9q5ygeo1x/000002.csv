@@ -1,0 +1,5 @@
+"0","help(predict.glm)
+"
+"2","Error in `?`(predict.glm, help(predict.glm)) : 
+  no documentation of type ‘predict.glm’ and topic ‘help(predict.glm)’ (or error in processing help)
+"

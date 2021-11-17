@@ -1,0 +1,134 @@
+"0","library(haven)"
+"0","datos <- read_dta(""Datos/ARM_Data/nes/nes5200_processed_voters_realideo.dta"")"
+"0","attach(datos)"
+"2","The following objects are masked from datos (pos = 3):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 4):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 5):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 6):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 7):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 8):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 9):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 10):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"2","The following objects are masked from datos (pos = 11):
+
+    age, age_10, age_sq, age_sq_10, black, cd, dem_therm, dlikes,
+    educ1, educ2, educ3, father_party, female, fips_cty, gender,
+    icpsr_cty, ideo, ideo_feel, ideo7, income, inter_post,
+    inter_pre, martial_status, mother_party, newfathe, newmoth,
+    occup1, occup2, parent_party, partyid3, partyid3_b, partyid7,
+    perfin, perfin1, perfin2, presadm, presapprov, presvote,
+    presvote_2party, presvote_intent, race, real_ideo, region,
+    regis, regisvote, religion, rep_pres_intent, rep_presvote,
+    rep_therm, resid, rlikes, south, state, str_partyid, union,
+    urban, vote, weight1, weight2, weight3, white, year
+
+"
+"0","# Tomar un subconjunto de los datos"
+"0","yr <- 1992"
+"0","ok <- year == yr & presvote < 3"
+"0","vote <- presvote[ok] - 1"
+"0","income <- income[ok]"

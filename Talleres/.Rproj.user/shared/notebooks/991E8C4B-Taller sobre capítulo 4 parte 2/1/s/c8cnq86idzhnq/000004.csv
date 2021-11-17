@@ -1,0 +1,1 @@
+"0","curve(expr=exp, from=-1, to=1, ylim=c(-0.7,2), col=""red"", lwd=4, ylab=""f(x)"", las=1)"

@@ -1,0 +1,43 @@
+---
+title: "Taller sobre capítulo 4 parte 2"
+author: "Jennifer Salazar"
+date: "15/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Construya una función en R que reciba los vectores x e y cuantitativos. La función debe calcular y entregar los parámetros de la línea recta mostrada en la figura. El usuario podrá elegir el método a usar method=c('pcl', 'rl'). Use la estructura mostrada a continuación
+
+
+```{r}
+my_lm <- function(x, y, method) {
+  if(method=="rl"){
+    modelo <- lm(y~x)
+    betas <- coef(modelo)
+  }else if(method=="pcl"){
+    
+  }
+  
+  return(betas)
+}
+```
+
+
+
+Transformación logaritmica
+
+```{r}
+curve(expr=exp, from=-1, to=1, ylim=c(-0.7,2), col="red", lwd=4, ylab="f(x)", las=1)
+fun <- function(x) x + 1
+curve(expr = fun, add=TRUE, lwd=4, col="blue")
+grid()
+abline(h=0)
+abline(v=0)
+
+```
+

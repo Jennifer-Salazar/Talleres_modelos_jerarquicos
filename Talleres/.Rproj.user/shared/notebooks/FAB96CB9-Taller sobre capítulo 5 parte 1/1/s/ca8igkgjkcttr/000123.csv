@@ -1,0 +1,1 @@
+"0","barplot(table(vote), col=""cyan4"", xaxt=""n"", ylim=c(0, 850))"

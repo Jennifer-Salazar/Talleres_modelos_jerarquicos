@@ -1,0 +1,1 @@
+"0","curve (cbind (1, mean(mom_hs), x) %*% beta.hat, col=""black"", add=TRUE)"

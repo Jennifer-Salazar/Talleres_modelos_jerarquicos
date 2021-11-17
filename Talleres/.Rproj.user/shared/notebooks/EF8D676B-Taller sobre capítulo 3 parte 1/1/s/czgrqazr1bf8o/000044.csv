@@ -1,0 +1,1 @@
+"0","abline(c(coef(mod3)[1]+coef(mod3)[2], coef(mod3)[3]), col=""gray"")"

@@ -1,0 +1,5 @@
+"0","kable(tabla)
+"
+"2","Error in gsub(""\"""", ""\\\"""", string, fixed = TRUE) : 
+  input string 2 is invalid UTF-8
+"

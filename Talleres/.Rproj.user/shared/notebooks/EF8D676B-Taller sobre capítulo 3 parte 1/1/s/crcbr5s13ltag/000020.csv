@@ -1,0 +1,1 @@
+"0","plot(kidiq_hs_0$mom_iq,kidiq_hs_0$kid_score, pch=19, xlab=""Mother IQ score"", ylab=""Child test score"", ylim=c(10, 150), xlim=c(70, 140))"

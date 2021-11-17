@@ -1,0 +1,2 @@
+"0","fun <- function(x) x + 1"
+"0","curve(expr = fun, add=TRUE, lwd=4, col=""blue"")"

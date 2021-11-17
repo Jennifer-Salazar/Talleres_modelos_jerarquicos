@@ -1,0 +1,32 @@
+{
+    "id": "AF19D838",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1637039296340.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "expression": "datos",
+        "caption": "datos",
+        "totalObservations": 41498,
+        "displayedObservations": 41498,
+        "variables": 62,
+        "cacheKey": "90DAECBD",
+        "object": "datos",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=datos&cache_key=90DAECBD&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 19140526052999234,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1637039296340,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,4 @@
+"0","for (i in 1:10){"
+"0","  curve (cbind (1, mean(mom_hs), x) %*% beta.sim[i,], lwd=.5, col=""gray"","
+"0","    add=TRUE)"
+"0","}"

@@ -1,0 +1,1 @@
+"0","curve (invlogit(coef(fit.1)[1] + coef(fit.1)[2]*x), -2, 8, lwd=.5, add=T)"

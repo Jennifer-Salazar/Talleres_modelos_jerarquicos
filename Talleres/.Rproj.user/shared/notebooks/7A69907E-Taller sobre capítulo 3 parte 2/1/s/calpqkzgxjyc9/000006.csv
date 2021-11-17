@@ -1,0 +1,4 @@
+"0",""
+"0",""
+"0",""
+"0","plot(modelo2$fitted.values, modelo2$residuals, xlab=""Predicted score"", ylab=""Predicted error"", pch=20)"

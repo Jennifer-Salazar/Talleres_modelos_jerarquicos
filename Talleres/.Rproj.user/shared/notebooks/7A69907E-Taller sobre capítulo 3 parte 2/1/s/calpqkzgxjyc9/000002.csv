@@ -1,0 +1,5 @@
+"0","resumen <- summary(modelo2)"
+"0","sigma <- resumen$sigma"
+"0",""
+"0","par(mfrow=c(1,2))"
+"0","plot(modelo2$fitted.values, kid_score, xlab=""Predicciones"", ylab = ""Reales"", pch=20, xlim=c(20, 140), ylim=c(2,140))"

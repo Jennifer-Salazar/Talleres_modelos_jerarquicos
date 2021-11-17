@@ -1,0 +1,1 @@
+"0","text(1.9, table(vote)[2]+40, paste(round(prop.table(table(vote))[2]*100,2), ""%""))"

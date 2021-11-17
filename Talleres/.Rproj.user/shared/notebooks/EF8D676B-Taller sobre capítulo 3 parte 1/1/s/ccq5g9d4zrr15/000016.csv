@@ -1,0 +1,2 @@
+"0","par(mfrow=c(1,2))"
+"0","plot(kidiq_hs_0$mom_iq, kidiq_hs_0$kid_score, pch=19, xlab=""Mother IQ score"", ylab=""Child test score"", xlim=c(73, 140))"

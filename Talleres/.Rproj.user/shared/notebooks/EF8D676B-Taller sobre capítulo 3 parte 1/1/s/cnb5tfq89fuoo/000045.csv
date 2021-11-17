@@ -1,0 +1,1 @@
+"0","plot(mom_hs+runif(dim(kidiq)[1], min = -0.02, max=0.02), kid_score, pch=19, xlab= ""Mother complete high school"", ylab = ""Child test score"", xaxt=""n"")"

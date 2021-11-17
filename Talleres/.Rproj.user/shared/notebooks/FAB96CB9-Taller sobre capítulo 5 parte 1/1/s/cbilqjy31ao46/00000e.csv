@@ -1,0 +1,8 @@
+"0",""
+"0",""
+"0","require(arm)"
+"0","# Graph figure 5.1 (b)"
+"0","sim.1 <- sim(fit.1)"
+"0","curve (invlogit(fit.1$coef[1] + fit.1$coef[2]*x), .5, 5.5, ylim=c(-.01,1.01),"
+"0","         xlim=c(.5,5.5), xaxt=""n"", xaxs=""i"", mgp=c(2,.5,0),"
+"0","         ylab=""Pr (Republican vote)"", xlab=""Income"", lwd=1)"

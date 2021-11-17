@@ -1,0 +1,1 @@
+"0","abline(c(coef(mod4)[1]+coef(mod4)[2], coef(mod4)[3]+coef(mod4)[4]))"
